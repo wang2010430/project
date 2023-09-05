@@ -1,0 +1,246 @@
+﻿<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{73E7117B-EA56-4CD2-B989-60528F9D7E0E}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NVTool</RootNamespace>
+    <AssemblyName>NVTool</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>0.1.6.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>logo.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Accessibility" />
+    <Reference Include="DevExpress.BonusSkins.v21.2" />
+    <Reference Include="DevExpress.Data.Desktop.v21.2" />
+    <Reference Include="DevExpress.Data.v21.2" />
+    <Reference Include="DevExpress.Utils.v21.2" />
+    <Reference Include="DevExpress.XtraBars.v21.2" />
+    <Reference Include="DevExpress.Sparkline.v21.2.Core" />
+    <Reference Include="DevExpress.XtraEditors.v21.2" />
+    <Reference Include="DevExpress.Printing.v21.2.Core" />
+    <Reference Include="DevExpress.XtraGrid.v21.2, Version=21.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraLayout.v21.2, Version=21.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.XtraPrinting.v21.2, Version=21.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.XtraTreeList.v21.2, Version=21.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraWizard.v21.2, Version=21.2.6.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.Linq" />
+    <Reference Include="System.Data.OleDb, Version=7.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Data.OleDb.7.0.0\lib\net462\System.Data.OleDb.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Runtime.Serialization.Formatters.Soap" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BLL\ExcelParser.cs" />
+    <Compile Include="BLL\GlobalEventHandler.cs" />
+    <Compile Include="BLL\NVItemDataConverter.cs" />
+    <Compile Include="BLL\PermissionManager.cs" />
+    <Compile Include="BLL\ProjectManage.cs" />
+    <Compile Include="BLL\TreelistXmlParser.cs" />
+    <Compile Include="DAL\Model\ButtonClickedEventArgs.cs" />
+    <Compile Include="DAL\Model\ItemNodeInfo.cs" />
+    <Compile Include="DAL\Model\StateChangedEventArgs.cs" />
+    <Compile Include="DAL\CommonData.cs" />
+    <Compile Include="DAL\Permission\PermissionContainer.cs" />
+    <Compile Include="DAL\Model\PermissionType.cs" />
+    <Compile Include="BLL\ProjectCommon.cs" />
+    <Compile Include="DAL\StructContainer.cs" />
+    <Compile Include="Helper\NVExcelHelper.cs" />
+    <Compile Include="UI\FormLogin.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\FormLogin.Designer.cs">
+      <DependentUpon>FormLogin.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\FormNodeInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\FormNodeInfo.Designer.cs">
+      <DependentUpon>FormNodeInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\FormProject.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UI\FormProject.Designer.cs">
+      <DependentUpon>FormProject.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\FormSerialParaConfig.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\FormSerialParaConfig.designer.cs">
+      <DependentUpon>FormSerialParaConfig.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UI\MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UI\WaitingForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\WaitingForm.Designer.cs">
+      <DependentUpon>WaitingForm.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="UI\FormLogin.resx">
+      <DependentUpon>FormLogin.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\FormNodeInfo.resx">
+      <DependentUpon>FormNodeInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\FormProject.resx">
+      <DependentUpon>FormProject.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\FormSerialParaConfig.resx">
+      <DependentUpon>FormSerialParaConfig.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\WaitingForm.resx">
+      <DependentUpon>WaitingForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="packages.config" />
+    <None Include="Properties\licenses.licx" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="App.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <None Include="Resources\Com.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Logo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="logo.ico" />
+    <None Include="Resources\openEye.png" />
+    <None Include="Resources\closeEye.png" />
+    <None Include="Resources\close.png" />
+    <None Include="Resources\LoadBin.png" />
+    <None Include="Resources\InPhone.png" />
+    <None Include="Resources\Upload.png" />
+    <None Include="Resources\download.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Channel\Channel.csproj">
+      <Project>{9ce8fd0b-548c-4657-8b0e-33b054eaee26}</Project>
+      <Name>Channel</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CmindProtocol\CmindProtocol.csproj">
+      <Project>{495a91c2-eb6d-4919-92ea-7ea168307d33}</Project>
+      <Name>CmindProtocol</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{ac324cba-e5cc-427c-81ff-3c19e64e854b}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LogNet\LogNet.csproj">
+      <Project>{f67ef490-7bda-41e0-8758-d13b8876e138}</Project>
+      <Name>LogNet</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NVParam\NVParam.csproj">
+      <Project>{40c5debc-2478-489e-b63d-b9a4290bb30e}</Project>
+      <Name>NVParam</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NVSSystem\NVSSystem.csproj">
+      <Project>{b2cb83e6-820f-44d6-bfc0-531fadfc54e6}</Project>
+      <Name>NVSSystem</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.7.2 %28x86 和 x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

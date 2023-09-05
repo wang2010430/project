@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{40C5DEBC-2478-489E-B63D-B9A4290BB30E}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NVParam</RootNamespace>
+    <AssemblyName>NVParam</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="EPPlus, Version=4.1.0.0, Culture=neutral, PublicKeyToken=ea159fdaa78159a1, processorArchitecture=MSIL">
+      <HintPath>..\packages\EPPlus.4.1.0\lib\net40\EPPlus.dll</HintPath>
+    </Reference>
+    <Reference Include="OfficeOpenXml.Extends, Version=1.0.6.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\OfficeOpenXml.Extends.1.0.6.0\lib\net40\OfficeOpenXml.Extends.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Core" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BLL\ConverterClassToNode.cs" />
+    <Compile Include="BLL\ExcelReader.cs" />
+    <Compile Include="BLL\NVRamManage.cs" />
+    <Compile Include="BLL\INVRamManage.cs" />
+    <Compile Include="DAL\Calibration.cs" />
+    <Compile Include="DAL\modem_common.cs" />
+    <Compile Include="DAL\NV_Project.cs" />
+    <Compile Include="DAL\phy_cfg.cs" />
+    <Compile Include="DAL\rf_cali_cfg.cs" />
+    <Compile Include="DAL\rf_cali_tbl.cs" />
+    <Compile Include="DAL\rf_nv_tbl.cs" />
+    <Compile Include="DAL\EDataType.cs" />
+    <Compile Include="DAL\ItemDataNode.cs" />
+    <Compile Include="DAL\NVItemData.cs" />
+    <Compile Include="DAL\NVRamParam.cs" />
+    <Compile Include="Helper\NVCommon.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Channel\Channel.csproj">
+      <Project>{9ce8fd0b-548c-4657-8b0e-33b054eaee26}</Project>
+      <Name>Channel</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CmindProtocol\CmindProtocol.csproj">
+      <Project>{495a91c2-eb6d-4919-92ea-7ea168307d33}</Project>
+      <Name>CmindProtocol</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{ac324cba-e5cc-427c-81ff-3c19e64e854b}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LogNet\LogNet.csproj">
+      <Project>{f67ef490-7bda-41e0-8758-d13b8876e138}</Project>
+      <Name>LogNet</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NVSSystem\NVSSystem.csproj">
+      <Project>{b2cb83e6-820f-44d6-bfc0-531fadfc54e6}</Project>
+      <Name>NVSSystem</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

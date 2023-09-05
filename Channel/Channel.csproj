@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{9CE8FD0B-548C-4657-8B0E-33B054EAEE26}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Channel</RootNamespace>
+    <AssemblyName>Channel</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <IntermediateOutputPath>C:\Users\JINLON~1.WAN\AppData\Local\Temp\vsA10.tmp\Debug\</IntermediateOutputPath>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <IntermediateOutputPath>C:\Users\JINLON~1.WAN\AppData\Local\Temp\vsA10.tmp\Release\</IntermediateOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Channel\Channel.cs" />
+    <Compile Include="Channel\ChannelManager.cs" />
+    <Compile Include="Channel\ChannleState.cs" />
+    <Compile Include="CommPort\CommPortBase.cs" />
+    <Compile Include="CommPort\CommPortCom.cs" />
+    <Compile Include="CommPort\CommPortShare.cs" />
+    <Compile Include="CommPort\CommPortSocket.cs" />
+    <Compile Include="CommPort\CommPortTcpClient.cs" />
+    <Compile Include="CommPort\CommPortTcpServerPackage.cs" />
+    <Compile Include="CommPort\CommPortTcpServerV3.cs" />
+    <Compile Include="CommPort\ICommPort.cs" />
+    <Compile Include="CommPort\PortBufferAccessor.cs" />
+    <Compile Include="CommPort\PortParam.cs" />
+    <Compile Include="CommPort\SocketPortBase.cs" />
+    <Compile Include="CommPort\TcpSocketKeepAlive.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Protocol\BusinessCase.cs" />
+    <Compile Include="Protocol\BusinessResult.cs" />
+    <Compile Include="Protocol\CrcCheck.cs" />
+    <Compile Include="Protocol\FormatterReaderBase.cs" />
+    <Compile Include="Protocol\FrameBase.cs" />
+    <Compile Include="Protocol\FrameParser.cs" />
+    <Compile Include="Protocol\IProtocol.cs" />
+    <Compile Include="Protocol\MainEntryBase.cs" />
+    <Compile Include="Protocol\ProtocolBase.cs" />
+    <Compile Include="Protocol\ProtocolTask.cs" />
+    <Service Include="{94E38DFF-614B-4cbd-B67C-F211BB35CE8B}" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{ac324cba-e5cc-427c-81ff-3c19e64e854b}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

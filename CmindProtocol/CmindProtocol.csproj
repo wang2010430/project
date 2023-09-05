@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{495A91C2-EB6D-4919-92EA-7EA168307D33}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>CmindProtocol</RootNamespace>
+    <AssemblyName>CmindProtocol</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CmindBusiness\BusinessBase.cs" />
+    <Compile Include="CmindBusiness\ChangeBaudBussiness.cs" />
+    <Compile Include="CmindBusiness\ConnectBussiness.cs" />
+    <Compile Include="CmindBusiness\ConnectNVForRead.cs" />
+    <Compile Include="CmindBusiness\ReadNVItemData.cs" />
+    <Compile Include="CmindBusiness\WriteNVItemData.cs" />
+    <Compile Include="DLL\NVReadParam.cs" />
+    <Compile Include="DLL\NVSSystemInfo.cs" />
+    <Compile Include="DLL\NVWriteParam.cs" />
+    <Compile Include="CmindBusiness\ConnectNVForWrite.cs" />
+    <Compile Include="CmindBusiness\EraseFlashBussiness.cs" />
+    <Compile Include="CmindBusiness\ExecuteBussiness.cs" />
+    <Compile Include="CmindBusiness\HandshakeBussiness.cs" />
+    <Compile Include="CmindBusiness\ProdutionBussiness.cs" />
+    <Compile Include="CmindBusiness\ProdutionPara\CommonStructs.cs" />
+    <Compile Include="CmindBusiness\ProdutionPara\IProduction.cs" />
+    <Compile Include="CmindBusiness\ProdutionPara\Prodution_ConstPower.cs" />
+    <Compile Include="CmindBusiness\ProdutionPara\Prodution_SetMode.cs" />
+    <Compile Include="CmindBusiness\QueryPower.cs" />
+    <Compile Include="CmindBusiness\ReadDataBussiness.cs" />
+    <Compile Include="CmindBusiness\ReadEfuseBussiness.cs" />
+    <Compile Include="CmindBusiness\WriteDataBussiness.cs" />
+    <Compile Include="CmindBusiness\WriteEfuseBussiness.cs" />
+    <Compile Include="CmindCommon.cs" />
+    <Compile Include="CmindFrame.cs" />
+    <Compile Include="Cmind.cs" />
+    <Compile Include="CmindType.cs" />
+    <Compile Include="DLL\NVType.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Channel\Channel.csproj">
+      <Project>{9ce8fd0b-548c-4657-8b0e-33b054eaee26}</Project>
+      <Name>Channel</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{ac324cba-e5cc-427c-81ff-3c19e64e854b}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LogNet\LogNet.csproj">
+      <Project>{F67EF490-7BDA-41E0-8758-D13B8876E138}</Project>
+      <Name>LogNet</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
