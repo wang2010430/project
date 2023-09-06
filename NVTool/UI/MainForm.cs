@@ -10,8 +10,6 @@ using System.Reflection;
 using System.Windows.Forms;
 using Common;
 using NVParam.DAL;
-using System.Data;
-using NVTool.Helper;
 
 namespace NVTool.UI
 {
@@ -205,54 +203,54 @@ namespace NVTool.UI
 
         private void barItemExcelParser_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
-            // 创建 DataTable
-            DataTable dataTable = new DataTable("MyTable");
+            //// 创建 DataTable
+            //DataTable dataTable = new DataTable("MyTable");
 
-            // 定义数据表的列，例如添加两列：ID 和 Name
-            dataTable.Columns.Add("ID", typeof(int));
-            dataTable.Columns.Add("Name", typeof(string));
+            //// 定义数据表的列，例如添加两列：ID 和 Name
+            //dataTable.Columns.Add("ID", typeof(int));
+            //dataTable.Columns.Add("Name", typeof(string));
 
-            // 向数据表中添加数据行
-            dataTable.Rows.Add(1, "John");
-            dataTable.Rows.Add(2, "Alice");
-            dataTable.Rows.Add(3, "Bob");
+            //// 向数据表中添加数据行
+            //dataTable.Rows.Add(1, "John");
+            //dataTable.Rows.Add(2, "Alice");
+            //dataTable.Rows.Add(3, "Bob");
 
-            string filePath = ProjectCommon.GetFilePathByDialog(EDiagFileType.Excel);
+            //string filePath = "NVTable.xlsx";
 
-            try
-            {
-                bool success = NVExcelHelper.OutputToExcel(dataTable, filePath);
-
-                if (success)
-                {
-                    Console.WriteLine("Successfully Excel File。");
-                }
-                else
-                {
-                    Console.WriteLine("Export Excel Failed。");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Failed：" + ex.Message);
-            }
             //try
             //{
-            //    string filePath = ProjectCommon.GetFilePathByDialog(EDiagFileType.Excel);
-            //    if (string.IsNullOrEmpty(filePath))
-            //    {
-            //        return;
-            //    }
+            //    bool success = NVExcelHelper.OutputToExcel(dataTable, filePath);
 
-            //    ExcelParser excelParser = new ExcelParser();
-            //    ItemDataNode node;
-            //    BoolQResult ret = excelParser.ExcelToItemNode(filePath, out node);
-            //    ProjectCommon.ShowMessage(ret);
+            //    if (success)
+            //    {
+            //        Console.WriteLine("Successfully Excel File。");
+            //    }
+            //    else
+            //    {
+            //        Console.WriteLine("Export Excel Failed。");
+            //    }
             //}
             //catch (Exception ex)
             //{
             //    ProjectCommon.ShowMessage(new BoolQResult(false, ex.Message));
             //}
+            try
+            {
+                string filePath = ProjectCommon.GetFilePathByDialog(EDiagFileType.Excel);
+                if (string.IsNullOrEmpty(filePath))
+                {
+                    return;
+                }
+
+                ExcelParser excelParser = new ExcelParser();
+                ItemDataNode node;
+                BoolQResult ret = excelParser.ExcelToItemNode(filePath, out node);
+                ProjectCommon.ShowMessage(ret);
+            }
+            catch (Exception ex)
+            {
+                ProjectCommon.ShowMessage(new BoolQResult(false, ex.Message));
+            }
         }
 
         public event EventHandler<ButtonClickedEventArgs> ButtonClicked;
