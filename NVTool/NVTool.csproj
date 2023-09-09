@@ -106,6 +106,7 @@
     <Compile Include="DAL\Model\PermissionType.cs" />
     <Compile Include="BLL\ProjectCommon.cs" />
     <Compile Include="DAL\StructContainer.cs" />
+    <Compile Include="Helper\ItemDataNodeHelper.cs" />
     <Compile Include="Helper\NVExcelHelper.cs" />
     <Compile Include="UI\FormLogin.cs">
       <SubType>Form</SubType>

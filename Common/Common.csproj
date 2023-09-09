@@ -47,7 +47,7 @@
     <Compile Include="BitHelper.cs" />
     <Compile Include="BoolQResult.cs" />
     <Compile Include="CommonHelper.cs" />
-    <Compile Include="CRC16X25.cs" />
+    <Compile Include="Crc16Calculator.cs" />
     <Compile Include="DataCustom.cs" />
     <Compile Include="DataConvert.cs" />
     <Compile Include="EventHandle.cs" />

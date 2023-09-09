@@ -48,6 +48,8 @@ namespace NVTool.UI
             this.bar2 = new DevExpress.XtraBars.Bar();
             this.barItemFile = new DevExpress.XtraBars.BarSubItem();
             this.barItemSaveAs = new DevExpress.XtraBars.BarButtonItem();
+            this.barSubItem1 = new DevExpress.XtraBars.BarSubItem();
+            this.barItemExcelParser = new DevExpress.XtraBars.BarButtonItem();
             this.barButtonItem3 = new DevExpress.XtraBars.BarButtonItem();
             this.statusBar = new DevExpress.XtraBars.Bar();
             this.barCopyright = new DevExpress.XtraBars.BarStaticItem();
@@ -58,15 +60,18 @@ namespace NVTool.UI
             this.barDockControlLeft = new DevExpress.XtraBars.BarDockControl();
             this.barDockControlRight = new DevExpress.XtraBars.BarDockControl();
             this.barSubItem2 = new DevExpress.XtraBars.BarSubItem();
+            this.barToolbarsListItem2 = new DevExpress.XtraBars.BarToolbarsListItem();
             this.popupMenu1 = new DevExpress.XtraBars.PopupMenu(this.components);
             this.ribbonPage2 = new DevExpress.XtraBars.Ribbon.RibbonPage();
             this.panelWorkspace = new System.Windows.Forms.Panel();
             this.barLargeButtonItem1 = new DevExpress.XtraBars.BarLargeButtonItem();
             this.barToolbarsListItem1 = new DevExpress.XtraBars.BarToolbarsListItem();
             this.barButtonItem1 = new DevExpress.XtraBars.BarButtonItem();
-            this.barToolbarsListItem2 = new DevExpress.XtraBars.BarToolbarsListItem();
-            this.barSubItem1 = new DevExpress.XtraBars.BarSubItem();
-            this.barItemExcelParser = new DevExpress.XtraBars.BarButtonItem();
+            this.barButtonItem2 = new DevExpress.XtraBars.BarButtonItem();
+            this.barButtonItem4 = new DevExpress.XtraBars.BarButtonItem();
+            this.barButtonItem5 = new DevExpress.XtraBars.BarButtonItem();
+            this.barButtonItem6 = new DevExpress.XtraBars.BarButtonItem();
+            this.barButtonItem7 = new DevExpress.XtraBars.BarButtonItem();
             ((System.ComponentModel.ISupportInitialize)(this.barManagerMenu)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.popupMenu1)).BeginInit();
             this.SuspendLayout();
@@ -109,9 +114,14 @@ namespace NVTool.UI
             this.barItemSaveAs,
             this.barToolbarsListItem2,
             this.barSubItem1,
-            this.barItemExcelParser});
+            this.barItemExcelParser,
+            this.barButtonItem2,
+            this.barButtonItem4,
+            this.barButtonItem5,
+            this.barButtonItem6,
+            this.barButtonItem7});
             this.barManagerMenu.MainMenu = this.bar2;
-            this.barManagerMenu.MaxItemId = 50;
+            this.barManagerMenu.MaxItemId = 55;
             this.barManagerMenu.StatusBar = this.statusBar;
             // 
             // barMenu
@@ -260,7 +270,12 @@ namespace NVTool.UI
             this.barItemFile.Caption = "File";
             this.barItemFile.Id = 24;
             this.barItemFile.LinksPersistInfo.AddRange(new DevExpress.XtraBars.LinkPersistInfo[] {
-            new DevExpress.XtraBars.LinkPersistInfo(this.barItemSaveAs)});
+            new DevExpress.XtraBars.LinkPersistInfo(this.barItemSaveAs),
+            new DevExpress.XtraBars.LinkPersistInfo(this.barButtonItem2, true),
+            new DevExpress.XtraBars.LinkPersistInfo(this.barButtonItem4),
+            new DevExpress.XtraBars.LinkPersistInfo(this.barButtonItem5),
+            new DevExpress.XtraBars.LinkPersistInfo(this.barButtonItem6),
+            new DevExpress.XtraBars.LinkPersistInfo(this.barButtonItem7, true)});
             this.barItemFile.Name = "barItemFile";
             // 
             // barItemSaveAs
@@ -270,6 +285,23 @@ namespace NVTool.UI
             this.barItemSaveAs.ImageOptions.LargeImage = ((System.Drawing.Image)(resources.GetObject("barItemSaveAs.ImageOptions.LargeImage")));
             this.barItemSaveAs.Name = "barItemSaveAs";
             this.barItemSaveAs.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.barItemSaveAs_ItemClick);
+            // 
+            // barSubItem1
+            // 
+            this.barSubItem1.Caption = "Tool";
+            this.barSubItem1.Id = 48;
+            this.barSubItem1.LinksPersistInfo.AddRange(new DevExpress.XtraBars.LinkPersistInfo[] {
+            new DevExpress.XtraBars.LinkPersistInfo(this.barItemExcelParser)});
+            this.barSubItem1.Name = "barSubItem1";
+            // 
+            // barItemExcelParser
+            // 
+            this.barItemExcelParser.Caption = "Excel Parse";
+            this.barItemExcelParser.Id = 49;
+            this.barItemExcelParser.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("barItemExcelParser.ImageOptions.Image")));
+            this.barItemExcelParser.ImageOptions.LargeImage = ((System.Drawing.Image)(resources.GetObject("barItemExcelParser.ImageOptions.LargeImage")));
+            this.barItemExcelParser.Name = "barItemExcelParser";
+            this.barItemExcelParser.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.barItemExcelParser_ItemClick);
             // 
             // barButtonItem3
             // 
@@ -360,6 +392,12 @@ namespace NVTool.UI
             this.barSubItem2.Id = 25;
             this.barSubItem2.Name = "barSubItem2";
             // 
+            // barToolbarsListItem2
+            // 
+            this.barToolbarsListItem2.Caption = "Tool";
+            this.barToolbarsListItem2.Id = 47;
+            this.barToolbarsListItem2.Name = "barToolbarsListItem2";
+            // 
             // popupMenu1
             // 
             this.popupMenu1.Manager = this.barManagerMenu;
@@ -395,28 +433,35 @@ namespace NVTool.UI
             this.barButtonItem1.Id = 44;
             this.barButtonItem1.Name = "barButtonItem1";
             // 
-            // barToolbarsListItem2
+            // barButtonItem2
             // 
-            this.barToolbarsListItem2.Caption = "Tool";
-            this.barToolbarsListItem2.Id = 47;
-            this.barToolbarsListItem2.Name = "barToolbarsListItem2";
+            this.barButtonItem2.Caption = "Save to Phone";
+            this.barButtonItem2.Id = 50;
+            this.barButtonItem2.Name = "barButtonItem2";
             // 
-            // barSubItem1
+            // barButtonItem4
             // 
-            this.barSubItem1.Caption = "Tool";
-            this.barSubItem1.Id = 48;
-            this.barSubItem1.LinksPersistInfo.AddRange(new DevExpress.XtraBars.LinkPersistInfo[] {
-            new DevExpress.XtraBars.LinkPersistInfo(this.barItemExcelParser)});
-            this.barSubItem1.Name = "barSubItem1";
+            this.barButtonItem4.Caption = "Load From Phone";
+            this.barButtonItem4.Id = 51;
+            this.barButtonItem4.Name = "barButtonItem4";
             // 
-            // barItemExcelParser
+            // barButtonItem5
             // 
-            this.barItemExcelParser.Caption = "Excel Parse";
-            this.barItemExcelParser.Id = 49;
-            this.barItemExcelParser.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("barItemExcelParser.ImageOptions.Image")));
-            this.barItemExcelParser.ImageOptions.LargeImage = ((System.Drawing.Image)(resources.GetObject("barItemExcelParser.ImageOptions.LargeImage")));
-            this.barItemExcelParser.Name = "barItemExcelParser";
-            this.barItemExcelParser.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.barItemExcelParser_ItemClick);
+            this.barButtonItem5.Caption = "Save For Bin";
+            this.barButtonItem5.Id = 52;
+            this.barButtonItem5.Name = "barButtonItem5";
+            // 
+            // barButtonItem6
+            // 
+            this.barButtonItem6.Caption = "Load From Bin";
+            this.barButtonItem6.Id = 53;
+            this.barButtonItem6.Name = "barButtonItem6";
+            // 
+            // barButtonItem7
+            // 
+            this.barButtonItem7.Caption = "Quit";
+            this.barButtonItem7.Id = 54;
+            this.barButtonItem7.Name = "barButtonItem7";
             // 
             // MainForm
             // 
@@ -479,6 +524,11 @@ namespace NVTool.UI
         private DevExpress.XtraBars.BarSubItem barSubItem1;
         private DevExpress.XtraBars.BarButtonItem barItemExcelParser;
         private DevExpress.XtraBars.BarToolbarsListItem barToolbarsListItem2;
+        private DevExpress.XtraBars.BarButtonItem barButtonItem2;
+        private DevExpress.XtraBars.BarButtonItem barButtonItem4;
+        private DevExpress.XtraBars.BarButtonItem barButtonItem5;
+        private DevExpress.XtraBars.BarButtonItem barButtonItem6;
+        private DevExpress.XtraBars.BarButtonItem barButtonItem7;
     }
 }
 

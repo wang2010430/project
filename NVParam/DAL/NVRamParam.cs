@@ -13,9 +13,29 @@ namespace NVParam.DAL
 {
     public class NVRamParam
     {
+        #region Attribute
+        private readonly object lockObject = new object(); // 创建用于锁定的对象
+       
         private ItemDataNode nvItem = new ItemDataNode();
-        public ItemDataNode Item { get => nvItem; set => nvItem = value; }
+        public ItemDataNode Item
+        {
+            get
+            {
+                lock (lockObject)
+                {
+                    return nvItem;
+                }
+            }
+            set
+            {
+                lock (lockObject)
+                {
+                    nvItem = value;
+                }
+            }
+        }
         public string Version { get; set; }
         public string Project { get; set; }
+        #endregion
     }
 }

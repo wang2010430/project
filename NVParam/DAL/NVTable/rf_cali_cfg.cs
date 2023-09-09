@@ -9,7 +9,7 @@
 * - 1.0 : Initial version (2023/7/8 17:17:51) - jinlong.wang
 ***************************************************************************************************/
 
-namespace NVParam.DAL
+namespace NVParam.DAL.NVTable
 {
     public class rf_cali_cfg
     {

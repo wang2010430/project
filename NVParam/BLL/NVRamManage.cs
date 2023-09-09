@@ -26,7 +26,7 @@ using System.Linq;
 
 namespace NVParam.BLL
 {
-    public class NVRamManage //: INVRamManage
+    public partial class NVRamManage //: INVRamManage
     {
         #region Attribute
         private NVRamParam nvRamParam = new NVRamParam();
@@ -49,52 +49,6 @@ namespace NVParam.BLL
         }
         #endregion
 
-        #region Comm Setting
-
-        /// <summary>
-        /// Disconnect
-        /// </summary>
-        public BoolQResult DisconnectCommunication()
-        {
-            try
-            {
-                bool bStart = CmindProtocol.StopWork(true);
-                if (bStart)
-                {
-                    return new BoolQResult(true, "DistConnect Successed");
-                }
-                return new BoolQResult(false, "DistConnect Failed");
-            }
-            catch (Exception ex)
-            {
-                return new BoolQResult(false, ex.Message);
-            }
-        }
-
-        /// <summary>
-        /// Connect
-        /// </summary>
-        /// <param name="portParam"></param>
-        /// <returns></returns>
-        public BoolQResult ConnectCommunication(ICommPort portParam)
-        {
-            try
-            {
-                CmindProtocol.Port = portParam;
-                //
-                bool bStart = CmindProtocol.StartWork();
-                if (bStart)
-                {
-                    return new BoolQResult(true, "Connect Successed!");
-                }
-                return new BoolQResult(false, "Connect Failed");
-            }
-            catch (IOException ex)
-            {
-                return new BoolQResult(false, ex.Message);
-            }
-        }
-        #endregion
 
         #region Function
         /// <summary>
@@ -120,103 +74,7 @@ namespace NVParam.BLL
             }
         }
 
-        
 
-        /// <summary>
-        /// Read NV Param
-        /// </summary>
-        /// <param name="ItemID"></param>
-        /// <param name="node"></param>
-        /// <returns></returns>
-        public BoolQResult ReadNVParam(ushort ItemID, ItemDataNode node)
-        {
-            try
-            {
-                if (node == null)
-                {
-                    return new BoolQResult(false, "Node is Null");
-                }
-                node.ItemID = ItemID.ToString();
-                NVReadParam param = new NVReadParam()
-                {
-                    OperationMode = (byte)NVOperateMode.OneByOneMode,
-                    ItemID = ItemID,
-                    Length = (ushort)GetTotalByteCount(node)
-                };
-
-                Action<double> progressCallBack = (progress) =>
-                {
-                    // 在这里处理进度更新的逻辑
-                    //Console.WriteLine($"Progress: {progress}%");
-                };
-
-                ReadNVDataResult bResult = CmindProtocol.ReadNVItemDataByID(param, progressCallBack, param.Length);
-                if (bResult.Result == false)
-                {
-                    return new BoolQResult(false, $"Read ItemID = {ItemID} Failed: case <{bResult.Msg}>");
-                }
-                //assignment
-                BoolQResult setResult = SetItemValuesFromBytes(node, bResult.datas);
-                if (setResult.Result == false)
-                {
-                    return setResult;
-                }
-
-                return new BoolQResult(true, string.Empty);
-            }
-            catch (Exception ex)
-            {
-                return new BoolQResult(false, ex.Message);
-            }
-        }
-
-        /// </summary>
-        /// Write NV Param
-        /// </summary>
-        /// <param name="ItemID"></param>
-        /// <param name="node"></param>
-        /// <returns></returns>
-        public BoolQResult WriteNVParam(ushort ItemID, ItemDataNode node)
-        {
-            try
-            {
-                if (node == null)
-                {
-                    return new BoolQResult(false, "Node is Null");
-                }
-
-                NVWriteParam param = new NVWriteParam()
-                {
-                    ItemID = ItemID,
-                    DownloadMode = (byte)NVDownloadMode.NORMAL_MODE,
-                    OperationMode = (byte)NVOperateMode.OneByOneMode,
-                    Length = (uint)GetTotalByteCount(node),
-                };
-                Action<double> progressCallBack = (progress) =>
-                {
-                    //Console.WriteLine($"ItemID = {ItemID} Progress: {progress}%");
-                };
-
-                byte[] sendData = ConvertToByte(node);
-                if (param.Length == sendData.Length)
-                {
-                    BusinessResult bResult = CmindProtocol.WriteNVItemDataByID(param, progressCallBack, sendData);
-                    if (bResult.Result == false)
-                    {
-                        return new BoolQResult(false, $"Write ItemID = {ItemID} Failed: case <{bResult.Msg}>");
-                    }
-                }
-                else
-                {
-                    return new BoolQResult(false, $"Length is wrong, param.Length = {param.Length} sendData.Length = {sendData.Length}");
-                }
-                return new BoolQResult(true, string.Empty);
-            }
-            catch (Exception ex)
-            {
-                return new BoolQResult(false, ex.Message);
-            }
-        }
 
         /// <summary>
         /// Find Item Node byte ItemName
@@ -305,7 +163,7 @@ namespace NVParam.BLL
                     param.Length = (uint)GetTotalByteCount(node);
                     byte[] sendData = ConvertToByte(node);
                     LogNetHelper.Debug($"NodeName = {node.ItemName} ItemId = {Id} sendData = {sendData.Length}  param.Length = { param.Length}");
-                    
+
                     if (param.Length == sendData.Length)
                     {
                         BusinessResult bResult = CmindProtocol.WriteNVItemDataByID(param, progressCallBack, sendData);
@@ -380,57 +238,64 @@ namespace NVParam.BLL
                 return new BoolQResult(false, ex.Message);
             }
         }
-
         /// <summary>
         /// save Image To Phone 
         /// </summary>
         /// <param name="progressCallBack"></param>
         /// <returns></returns>
-        public BoolQResult SaveImageToPhone(Action<string> progressCallBack)
+        public BoolQResult SaveImageToPhone(Action<string> progressCallBack, string backupFilePath)
         {
-            PartitionType partitionType = PartitionType.RO;
-            //
-            Action<double> callBack = (progress) =>
+            //backup nvs sys
+            BoolQResult ret = BackupNVSFromBoard(progressCallBack, backupFilePath);
+            if (!ret.Result)
             {
-                string result = progress.ToString("0.00");
-                string callbackMsg = $"Write {partitionType.ToString()} Sectors, Progress = {result}%";
-                progressCallBack?.Invoke(callbackMsg);
-            };
-
-            NVWriteParam param = new NVWriteParam()
-            {
-                DownloadMode = (byte)NVDownloadMode.NORMAL_MODE,
-                OperationMode = (byte)NVOperateMode.WholeMode,
-            };
-
-            //读取Partition文件
-            byte[] partitionData = FileUtils.ReadFileBytes("partitionsRO.bin");
-            //Read RO Sector
-            param.Length = (uint)partitionData.Length;
-            param.ItemID = NVCommon.GenerateItemID((byte)partitionType, (byte)Domain.Commmon, 0);
-            partitionType = PartitionType.RO;
-            BusinessResult bResult = CmindProtocol.WriteNVItemDataByID(param, callBack, partitionData);
-            if (bResult.Result == false)
-            {
-                return new BoolQResult(false, $"Write {partitionType.ToString()} Sector Failed: case <{bResult.Msg}>");
+                return ret;
             }
 
-            //读取Partition文件
-            partitionData = FileUtils.ReadFileBytes("partitions.bin");
-            //Read RW Sector
-            partitionType = PartitionType.RW;
-            param.Length = (uint)partitionData.Length;
-            param.ItemID = NVCommon.GenerateItemID((byte)partitionType, (byte)Domain.Commmon, 0);
+            // 
 
-            bResult = CmindProtocol.WriteNVItemDataByID(param, callBack, partitionData);
-            if (bResult.Result == false)
-            {
-                return new BoolQResult(false, $"Write {partitionType.ToString()} Sector Failed: case <{bResult.Msg}>");
-            }
+            //PartitionType partitionType = PartitionType.RO;
+            ////
+            //Action<double> callBack = (progress) =>
+            //{
+            //    string result = progress.ToString("0.00");
+            //    string callbackMsg = $"Write {partitionType} Sectors, Progress = {result}%";
+            //    progressCallBack?.Invoke(callbackMsg);
+            //};
+
+            //NVWriteParam param = new NVWriteParam()
+            //{
+            //    DownloadMode = (byte)NVDownloadMode.NORMAL_MODE,
+            //    OperationMode = (byte)NVOperateMode.WholeMode,
+            //};
+
+            ////读取Partition文件
+            //byte[] partitionData = FileUtils.ReadFileBytes("partitionsRO.bin");
+            ////Read RO Sector
+            //param.Length = (uint)partitionData.Length;
+            //param.ItemID = NVCommon.GenerateItemID((byte)partitionType, (byte)Domain.Commmon, 0);
+            //partitionType = PartitionType.RO;
+            //BusinessResult bResult = CmindProtocol.WriteNVItemDataByID(param, callBack, partitionData);
+            //if (bResult.Result == false)
+            //{
+            //    return new BoolQResult(false, $"Write {partitionType.ToString()} Sector Failed: case <{bResult.Msg}>");
+            //}
+
+            ////读取Partition文件
+            //partitionData = FileUtils.ReadFileBytes("partitions.bin");
+            ////Read RW Sector
+            //partitionType = PartitionType.RW;
+            //param.Length = (uint)partitionData.Length;
+            //param.ItemID = NVCommon.GenerateItemID((byte)partitionType, (byte)Domain.Commmon, 0);
+
+            //bResult = CmindProtocol.WriteNVItemDataByID(param, callBack, partitionData);
+            //if (bResult.Result == false)
+            //{
+            //    return new BoolQResult(false, $"Write {partitionType.ToString()} Sector Failed: case <{bResult.Msg}>");
+            //}
 
             return new BoolQResult(true);
         }
-
         /// <summary>
         /// 从手机中加载image
         /// </summary>
@@ -442,7 +307,7 @@ namespace NVParam.BLL
             Action<double> progressCallBack = (progress) =>
             {
                 string result = progress.ToString("0.00");
-                ItemProgressCallBack?.Invoke($"Read {partitionType.ToString()} Sectors , Progress = {result}%");
+                ItemProgressCallBack?.Invoke($"Read {partitionType} Sectors , Progress = {result}%");
             };
 
             NVReadParam param = new NVReadParam()
@@ -459,30 +324,30 @@ namespace NVParam.BLL
             {
                 return new BoolQResult(false, $"Read From Phone Failed: case <{bResult.Msg}>");
             }
-            FileUtils.WriteFileBytes(bResult.datas, $"partitionsRO.bin");
-            
+            FileUtils.WriteFileBytes(bResult.datas, $"bin/partitionsRO.bin");
+
             for (int count = 0; count < bResult.sectorCount; count++)
             {
                 byte[] data = new byte[bResult.sectorSize];
                 Array.Copy(bResult.datas, bResult.sectorSize * count, data, 0, bResult.sectorSize);
-                FileUtils.WriteFileBytes(data, $"partitionsRO{count}.bin");
+                FileUtils.WriteFileBytes(data, $"bin/partitionsRO{count}.bin");
             }
 
             //读取RW分区
             partitionType = PartitionType.RW;
+            param.ItemID = NVCommon.GenerateItemID((byte)partitionType, (byte)Domain.Commmon, 0);
             bResult = CmindProtocol.ReadNVDataFromPhone(param, progressCallBack);
             if (bResult.Result == false)
             {
                 return new BoolQResult(false, $"Read From Phone Failed: case <{bResult.Msg}>");
             }
 
-            FileUtils.WriteFileBytes(bResult.datas, $"partitionsRW.bin");
+            FileUtils.WriteFileBytes(bResult.datas, $"bin/partitionsRW.bin");
             for (int count = 0; count < bResult.sectorCount; count++)
             {
                 byte[] data = new byte[bResult.sectorSize];
                 Array.Copy(bResult.datas, bResult.sectorSize * count, data, 0, bResult.sectorSize);
-                FileUtils.WriteFileBytes(data, $"partitions{count}.bin");
-                
+                FileUtils.WriteFileBytes(data, $"bin/partitionsRW{count}.bin");
             }
 
             NVSParam nvsParam = new NVSParam()
@@ -497,7 +362,7 @@ namespace NVParam.BLL
 
             List<ushort> listItemID = FindAllItemIDs(nvRamParam.Item);
             List<ushort> listNVSID = new List<ushort>();
-            
+
             // Get all keys and print them
             var keys = listItemData.Keys;
             foreach (int key in keys)
@@ -682,7 +547,7 @@ namespace NVParam.BLL
         public int GetNewItemID(ItemDataNode node)
         {
             List<ItemDataNode> listNode = node.GetAllNodes();
-            return  (listNode.Max(item => item.ID) + 1);
+            return (listNode.Max(item => item.ID) + 1);
         }
 
         /// <summary>
@@ -891,6 +756,111 @@ namespace NVParam.BLL
 
             return new BoolQResult(true, "Add child node successfully");
         }
+        #endregion
+
+        #region Common Function
+
+        /// <summary>
+        /// Reads a  sector from the specified partition and reports progress.
+        /// </summary>
+        /// <param name="callBack">A callback function to report progress.</param>
+        /// <param name="partitionType">The type of partition to read (e.g., System, Data).</param>
+        /// <returns>A <see cref="ReadNVDataResult"/> object containing the result of the read operation.</returns>
+        private ReadNVDataResult ReadSector(Action<string> callBack, PartitionType partitionType)
+        {
+            //read RO Sector
+            Action<double> progressCallBack = (progress) =>
+            {
+                string result = progress.ToString("0.00");
+                callBack?.Invoke($"Read {partitionType} Sectors , Progress = {result}%");
+            };
+
+            NVReadParam param = new NVReadParam()
+            {
+                ItemID = NVCommon.GenerateItemID((byte)partitionType, (byte)Domain.Commmon, 0),
+                OperationMode = (byte)NVOperateMode.WholeMode,
+                Length = 0
+            };
+
+            //读取RO分区
+            ReadNVDataResult bResult = new ReadNVDataResult();
+            bResult = CmindProtocol.ReadNVDataFromPhone(param, progressCallBack);
+            if (bResult.Result == false)
+            {
+                bResult.Result = false;
+                bResult.Msg = $"Read Failed: case <{bResult.Msg}>";
+                return bResult;
+            }
+
+            return bResult;
+        }
+
+        /// <summary>
+        /// Backs up NVS data from the board to a file.
+        /// </summary>
+        /// <param name="callBack">A callback function to report progress.</param>
+        /// <param name="filePath">The path where the NVS data will be saved.</param>
+        /// <returns>indicating the success or failure of the backup operation.</returns>
+        private BoolQResult BackupNVSFromBoard(Action<string> callBack, string filePath)
+        {
+            // Read the Read-Only (RO) sector.
+            try
+            {
+                ReadNVDataResult roResult = ReadSector(callBack, PartitionType.RO);
+                if (!roResult.Result)
+                {
+                    return new BoolQResult(false, roResult.Msg);
+                }
+
+                // Prepare storage parameters for the RO sector.
+                StorageParam ROParam = new StorageParam()
+                {
+                    SAttribute = SectorAttribute.RO,
+                    SectorCount = roResult.sectorCount,
+                    SectorSize = roResult.sectorSize * 1024,
+                    CRC = Crc16Calculator.Calculate(roResult.datas),
+                    SectorData = roResult.datas
+                };
+
+                // Read the Read-Write (RW) sector.
+                ReadNVDataResult rwResult = ReadSector(callBack, PartitionType.RW);
+                if (!rwResult.Result)
+                {
+                    return new BoolQResult(false, rwResult.Msg);
+                }
+
+                // Prepare storage parameters for the RW sector.
+                StorageParam RWParam = new StorageParam()
+                {
+                    SAttribute = SectorAttribute.RW,
+                    SectorCount = rwResult.sectorCount,
+                    SectorSize = rwResult.sectorSize * 1024,
+                    CRC = Crc16Calculator.Calculate(rwResult.datas),
+                    SectorData = rwResult.datas
+                };
+
+                // Create an NVSStorage instance and save data to the specified file.
+                NVSStorage nvsSystem = new NVSStorage();
+                BoolQResult bResult = nvsSystem.SaveData(filePath, ROParam, RWParam);
+
+                // Return the backup result.
+                return bResult;
+            }
+            catch (Exception ex)
+            {
+                return new BoolQResult(false, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="node"></param>
+        private void ConvertNodeToNVBin(ItemDataNode node)
+        {
+            //
+        }
+
         #endregion
     }
 }

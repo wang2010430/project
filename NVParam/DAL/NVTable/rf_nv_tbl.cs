@@ -2,7 +2,7 @@
 using NVParam.BLL;
 using System.Collections.Generic;
 
-namespace NVParam.DAL
+namespace NVParam.DAL.NVTable
 {
     public class rf_nv_tbl
     {

@@ -124,6 +124,9 @@ namespace NVTool.UI
                 case ButtonType.Test:
                     TestFunction();
                     break;
+                case ButtonType.ExcelParser:
+                    ExcelParserHandle();
+                    break;
                 default:
                     break;
             }
@@ -385,7 +388,7 @@ namespace NVTool.UI
         /// <param name="filePath"></param>
         private void LoadProject()
         {
-            string filePath = ProjectCommon.GetFilePathByDialog(EDiagFileType.xml);
+            string filePath = ProjectCommon.FileDialog(EDiagType.Select,EDiagFileType.xml);
             if (filePath != string.Empty)
             {
                 try
@@ -410,6 +413,35 @@ namespace NVTool.UI
                 }
             }
         }
+
+        #region Tool
+        private void ExcelParserHandle()
+        {
+            try
+            {
+                string filePath = ProjectCommon.FileDialog(EDiagType.Select, EDiagFileType.excel);
+                if (string.IsNullOrEmpty(filePath))
+                {
+                    return;
+                }
+
+                ExcelParser excelParser = new ExcelParser();
+                ItemDataNode node;
+                BoolQResult ret = excelParser.ExcelToItemNode(filePath, out node);
+
+                if (ret.Result)
+                {
+                    nvRamManage.NvRamParam.Item = node;
+                    UpdateTreelist();
+                }
+                ProjectCommon.ShowMessage(ret);
+            }
+            catch (Exception ex)
+            {
+                ProjectCommon.ShowMessage(new BoolQResult(false, ex.Message));
+            }
+        }
+        #endregion
 
         /// <summary>
         /// Stop Communication
@@ -479,8 +511,7 @@ namespace NVTool.UI
         {
             //read File 
             byte[] ROData = FileUtils.ReadFileBytes("partitionsRO.bin");
-            CRC16X25 crcValue = new CRC16X25();
-            ushort crc = crcValue.Calculate(ROData);
+            ushort crc = Crc16Calculator.Calculate(ROData);
             StorageParam ROParam = new StorageParam()
             {
                 SAttribute = SectorAttribute.RO,
@@ -491,8 +522,7 @@ namespace NVTool.UI
             };
 
             byte[] RWData = FileUtils.ReadFileBytes("partitionsRW.bin");
-            crcValue = new CRC16X25();
-            crc = crcValue.Calculate(RWData);
+            crc = Crc16Calculator.Calculate(RWData);
             StorageParam RWParam = new StorageParam()
             {
                 SAttribute = SectorAttribute.RW,
@@ -513,7 +543,17 @@ namespace NVTool.UI
         /// </summary>
         private void SaveToPhone()
         {
-            GlobalEventHandler.TriggerrunMsgEvent("Save to Phone");
+            if (!IsProjectFileLoaded(nvRamManage.ProjectFilePath))
+                return;
+
+            if (!IsCommConnect())
+                return;
+
+            //backup nvs 
+            string backFilePath = ProjectCommon.FileDialog(EDiagType.Save, EDiagFileType.bin);
+            if (string.IsNullOrEmpty(backFilePath))
+                return;
+
             ShowSplashScreen("Please Waiting!", "Save To Phone ");
             Task.Run(() =>
             {
@@ -522,11 +562,12 @@ namespace NVTool.UI
                     // 处理进度更新的逻辑
                     ShowSplashTips("Please Waiting!", msg);
                 };
-                BoolQResult bResult = nvRamManage.SaveImageToPhone(progressCallBack);
+                BoolQResult bResult = nvRamManage.SaveImageToPhone(progressCallBack, backFilePath);
+
 
                 CloseSplashScreen();
 
-                ProjectCommon.ShowMessage(bResult, false);
+                ProjectCommon.ShowMessage(bResult);
             });
         }
         #endregion
@@ -594,7 +635,7 @@ namespace NVTool.UI
             }
             else
             {
-                ProjectCommon.ShowMessage(new BoolQResult(false, "Please load the project"));
+                ProjectCommon.ShowMessage(new BoolQResult(false, "Project File is NULL"));
             }
         }
 
@@ -622,17 +663,17 @@ namespace NVTool.UI
         /// </summary>
         private void SaveAsProjectFile()
         {
-            if (!string.IsNullOrEmpty(nvRamManage.ProjectFilePath))
+            try
             {
-                string filePath = ProjectCommon.GetFilePathByDialog(EDiagFileType.xml);
+                string filePath = ProjectCommon.FileDialog(EDiagType.Save , EDiagFileType.xml);
                 if (!string.IsNullOrEmpty(filePath))
                 {
                     ProjectCommon.ShowMessage(SaveProjectFile(nvRamManage.NvRamParam, filePath));
                 }
             }
-            else
+            catch (Exception ex)
             {
-                ProjectCommon.ShowMessage(new BoolQResult(false, "Please load the project"));
+                ProjectCommon.ShowMessage(new BoolQResult(false, ex.Message));
             }
 
         }
@@ -828,6 +869,61 @@ namespace NVTool.UI
             node.SetValue("ItemID", dataNode.ItemID);
             node.SetValue("Content", dataNode.Content);
             node.SetValue("ItemState", dataNode.ItemState);
+        }
+        #endregion
+
+        #region Common Function
+        /// <summary>
+        /// Checks if a project file is loaded.
+        /// </summary>
+        /// <param name="filePath">The path to the project file.</param>
+        /// <returns>True if the project file is loaded; otherwise, false.</returns>
+        private bool IsProjectFileLoaded(string filePath)
+        {
+            // If the file path is empty or not specified, display an error message and return false.
+            if (string.IsNullOrEmpty(filePath))
+            {
+                ProjectCommon.ShowMessage(new BoolQResult(false, "Please load the project!"));
+                return false;
+            }
+
+            // If the file path is valid, return true.
+            return true;
+        }
+
+
+        /// <summary>
+        /// Checks if a board is connected for communication.
+        /// </summary>
+        /// <returns>
+        /// True if a connection to the board is established; otherwise, false.
+        /// </returns>
+        private bool IsCommConnect()
+        {
+            try
+            {
+                if (nvRamManage.CmindProtocol.Port == null)
+                {
+                    ProjectCommon.ShowMessage(new BoolQResult(false, "Please connect the board!"));
+                    return false;
+                }
+                // Check if the communication port is connected to the board.
+                if (!nvRamManage.CmindProtocol.Port.IsConnected)
+                {
+                    // If not connected or if the connection is unstable, show an error message and return false.
+                    ProjectCommon.ShowMessage(new BoolQResult(false, "Please connect the board!"));
+                    return false;
+                }
+
+                // If the communication port is connected and stable, return true.
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // Handle any exceptions that may occur and log the error.
+                ProjectCommon.ShowMessage(new BoolQResult(false, "An error occurred :" + ex.Message));
+                return false;
+            }
         }
         #endregion
 

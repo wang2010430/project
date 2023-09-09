@@ -28,7 +28,9 @@ namespace NVTool.DAL.Model
         LoadImage,
         SaveImage,
         LoadFromPhone,
-        SaveToPhone
+        SaveToPhone,
+        //Tool
+        ExcelParser,
     }
 
     public class ButtonClickedEventArgs : EventArgs

@@ -12,6 +12,7 @@
 using CmindProtocol.DLL;
 using NVParam.BLL;
 using NVParam.DAL;
+using NVParam.DAL.NVTable;
 using NVParam.Helper;
 
 namespace NVTool.BLL

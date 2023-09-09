@@ -9,7 +9,7 @@
 * - 1.0 : Initial version - jinlong.wang
 ***************************************************************************************************/
 
-namespace NVParam.DAL
+namespace NVParam.DAL.NVTable
 {
     public class NV_Project
     {

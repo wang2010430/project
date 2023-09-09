@@ -33,4 +33,13 @@ namespace NVTool.DAL
         Develeoper,
         Administrator
     }
+
+    enum ExcelClumnName
+    {
+        ItemName,
+        ItemValue,
+        Type,
+        ID,
+        Content,
+    }
 }

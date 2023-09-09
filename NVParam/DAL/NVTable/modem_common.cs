@@ -1,4 +1,4 @@
-﻿namespace NVParam.DAL
+﻿namespace NVParam.DAL.NVTable
 {
     public class modem_common
     {

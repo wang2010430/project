@@ -154,6 +154,44 @@ namespace NVParam.DAL
             return false;
         }
 
+        /// <summary>
+        /// 克隆一个 ItemDataNode 节点及其子节点。
+        /// </summary>
+        /// <param name="sourceNode">要克隆的源节点。</param>
+        /// <returns>克隆后的新节点。</returns>
+        public static ItemDataNode CloneItemDataNode(ItemDataNode sourceNode)
+        {
+            if (sourceNode == null)
+            {
+                return null;
+            }
+
+            ItemDataNode clonedNode = new ItemDataNode
+            {
+                ID = sourceNode.ID,
+                ParentID = sourceNode.ParentID,
+                ItemName = sourceNode.ItemName,
+                ItemValue = sourceNode.ItemValue,
+                DataType = sourceNode.DataType,
+                ItemID = sourceNode.ItemID,
+                Content = sourceNode.Content,
+                ItemState = sourceNode.ItemState,
+                Children = new List<ItemDataNode>()
+            };
+
+            // 递归复制子节点
+            foreach (var childNode in sourceNode.Children)
+            {
+                ItemDataNode clonedChild = CloneItemDataNode(childNode);
+                if (clonedChild != null)
+                {
+                    clonedNode.Children.Add(clonedChild);
+                }
+            }
+
+            return clonedNode;
+        }
+
         #endregion
     }
 }

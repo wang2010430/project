@@ -17,60 +17,89 @@ using System.Windows.Forms;
 
 namespace NVTool.BLL
 {
-    internal enum EDiagFileType
+    enum EDiagFileType
     {
         txt,
         xml,
-        Excel
+        excel,
+        bin
+    }
+    enum EDiagType
+    {
+        Select,
+        Save
     }
 
     internal static class ProjectCommon
     {
         /// <summary>
-        /// 打开文件对话框，获取用户选择的文件路径
+        /// Displays a file dialog for selecting a file or specifying a location to save a file
+        /// based on the specified file type.
         /// </summary>
-        /// <param name="eDiagFileType">指定文件类型</param>
-        /// <returns>所选文件的路径</returns>
-        internal static string GetFilePathByDialog(EDiagFileType eDiagFileType)
+        /// <param name="eDiagFileType">The type of file operation to perform (Select or Save).</param>
+        /// <param name="fileType">The type of file to select or save (e.g., txt, xml, bin).</param>
+        /// <returns>The selected file's path or the specified save location, or an empty string if canceled.</returns>
+        internal static string FileDialog(EDiagType eDiagFileType, EDiagFileType fileType)
         {
             string sTitle = string.Empty;
             string sFilter = string.Empty;
-
-            // 根据选择的文件类型设置对话框标题和筛选器
-           switch (eDiagFileType)
-{
-    case EDiagFileType.txt:
-        sTitle = "Select a txt file";
-        sFilter = "TXT Files (*.txt)|*.txt";
-        break;
-    case EDiagFileType.xml:
-        sTitle = "Select an xml File";
-        sFilter = "Xml Files (*.xml)|*.xml";
-        break;
-    case EDiagFileType.Excel:
-        sTitle = "Select an Excel File";
-        sFilter = "Excel Files (*.xlsx, *.xls)|*.xlsx;*.xls";
-        break;
-}
-
             string filePath = string.Empty;
-            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+
+            // Set the dialog title and filter based on the file type and operation.
+            switch (fileType)
             {
-                openFileDialog.Title = sTitle;
-                openFileDialog.Filter = sFilter;
+                case EDiagFileType.txt:
+                    sFilter = "TXT Files (*.txt)|*.txt";
+                    break;
+                case EDiagFileType.xml:
+                    sFilter = "Xml Files (*.xml)|*.xml";
+                    break;
+                case EDiagFileType.excel:
+                    sFilter = "Excel Files (*.xlsx, *.xls)|*.xlsx;*.xls";
+                    break;
+                case EDiagFileType.bin:
+                    sFilter = "Binary Files (*.bin)|*.bin";
+                    break;
+            }
 
-                // 显示打开文件对话框，获取用户选择的文件
-                DialogResult dialogResult = openFileDialog.ShowDialog();
-
-                if (dialogResult == DialogResult.OK)
+            // Determine the title based on the file operation.
+            if (eDiagFileType == EDiagType.Select)
+            {
+                sTitle = $"Select a {fileType} file";
+                using (OpenFileDialog openFileDialog = new OpenFileDialog())
                 {
-                    filePath = openFileDialog.FileName;
+                    openFileDialog.Title = sTitle;
+                    openFileDialog.Filter = sFilter;
+
+                    // Show the open file dialog and get the user's file selection.
+                    DialogResult dialogResult = openFileDialog.ShowDialog();
+
+                    if (dialogResult == DialogResult.OK)
+                    {
+                        filePath = openFileDialog.FileName;
+                    }
+                }
+            }
+            else if (eDiagFileType == EDiagType.Save)
+            {
+                sTitle = $"Save as {fileType} file";
+                using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+                {
+                    saveFileDialog.Title = sTitle;
+                    saveFileDialog.Filter = sFilter;
+
+                    // Show the save file dialog and get the user's specified save location.
+                    DialogResult dialogResult = saveFileDialog.ShowDialog();
+
+                    if (dialogResult == DialogResult.OK)
+                    {
+                        filePath = saveFileDialog.FileName;
+                    }
                 }
             }
 
             return filePath;
         }
-
         /// <summary>
         /// Get Copyright
         /// </summary>

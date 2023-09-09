@@ -1,4 +1,4 @@
-﻿namespace NVParam.DAL
+﻿namespace NVParam.DAL.NVTable
 {
     public class rf_cali_tbl
     {

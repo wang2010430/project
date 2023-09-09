@@ -1,26 +1,34 @@
 /***************************************************************************************************
 * copyright : 芯迈微半导体（珠海）有限公司
 * version   : 1.00
-* file      : CRC16X25.cs
+* file      : Crc16Calculator.cs
 * date      : 2023/8/20 10:20:35
 * author    : jinlong.wang
-* brief     : CRC-16/X25
+* brief     : Provides methods for calculating CRC-16/X25 checksums.
 * section Modification History
 * - 1.0 : Initial version - jinlong.wang
 ***************************************************************************************************/
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Common
-{
-    public class CRC16X25
+{ 
+    public static class Crc16Calculator
     {
-        private ushort[] crcTable = new ushort[256];
-        public CRC16X25()
+        #region Attribute
+        private static ushort[] crcTable = new ushort[256];
+        #endregion
+
+        #region Constructor
+        static Crc16Calculator()
+        {
+            InitializeCRCTable();
+        }
+        #endregion
+
+        #region Function
+        /// <summary>
+        /// Initializes the CRC table with precomputed values.
+        /// </summary>
+        private static void InitializeCRCTable()
         {
             ushort polynomial = 0x1021; // CRC-16/X25 polynomial
             for (ushort i = 0; i < 256; i++)
@@ -43,7 +51,12 @@ namespace Common
             }
         }
 
-        public ushort Calculate(byte[] data)
+        /// <summary>
+        /// Calculates the CRC-16/X25 checksum for the given byte array.
+        /// </summary>
+        /// <param name="data">The input byte array.</param>
+        /// <returns>The CRC-16/X25 checksum as a ushort value.</returns>
+        public static ushort Calculate(byte[] data)
         {
             ushort crc = 0xFFFF;
             foreach (byte b in data)
@@ -52,5 +65,6 @@ namespace Common
             }
             return crc;
         }
+        #endregion
     }
 }
