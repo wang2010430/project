@@ -45,6 +45,12 @@
     <Compile Include="BLL\ExcelReader.cs" />
     <Compile Include="BLL\NVRamManage.cs" />
     <Compile Include="BLL\NVRamService.cs" />
+    <Compile Include="Helper\NVSCommon.cs" />
+    <Compile Include="BLL\NVSStorage.cs" />
+    <Compile Include="BLL\NVSSysManage.cs" />
+    <Compile Include="DAL\NVSAte.cs" />
+    <Compile Include="DAL\NVSCommon.cs" />
+    <Compile Include="DAL\NVSParam.cs" />
     <Compile Include="DAL\NVTable\Calibration.cs" />
     <Compile Include="DAL\NVTable\modem_common.cs" />
     <Compile Include="DAL\NVTable\NV_Project.cs" />
@@ -56,6 +62,9 @@
     <Compile Include="DAL\ItemDataNode.cs" />
     <Compile Include="DAL\NVItemData.cs" />
     <Compile Include="DAL\NVRamParam.cs" />
+    <Compile Include="DAL\SectorInfo.cs" />
+    <Compile Include="DAL\StorageParam.cs" />
+    <Compile Include="Helper\CRCCalculator.cs" />
     <Compile Include="Helper\NVCommon.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -75,10 +84,6 @@
     <ProjectReference Include="..\LogNet\LogNet.csproj">
       <Project>{f67ef490-7bda-41e0-8758-d13b8876e138}</Project>
       <Name>LogNet</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\NVSSystem\NVSSystem.csproj">
-      <Project>{b2cb83e6-820f-44d6-bfc0-531fadfc54e6}</Project>
-      <Name>NVSSystem</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

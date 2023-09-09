@@ -9,20 +9,29 @@
 * - 1.0 : Initial version - jinlong.wang
 ***************************************************************************************************/
 
-using System;
-using System.Linq;
+using System.Runtime.InteropServices;
 
-namespace NVSSystem.DLL
+namespace NVParam.DAL
 {
     /// <summary>
-    /// NVS Param
+    /// 保存属性
     /// </summary>
-    public class NVSParam
+    public enum SectorAttribute
     {
-        public int SectorSize = 0;
-        public int SectorCount = 0;
+        RO = 0, //可读
+        RW = 1 //可读写
+    };
+
+    /// <summary>
+    /// 保存参数
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct StorageParam
+    {
+        public SectorAttribute SAttribute;
+        public int SectorSize;
+        public int SectorCount;
+        public ushort CRC;
         public byte[] SectorData;
     }
-
-
 }

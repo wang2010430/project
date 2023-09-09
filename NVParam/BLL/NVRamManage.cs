@@ -17,8 +17,6 @@ using Common;
 using log4net;
 using NVParam.DAL;
 using NVParam.Helper;
-using NVSSystem.BLL;
-using NVSSystem.DLL;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -252,7 +250,9 @@ namespace NVParam.BLL
                 return ret;
             }
 
-            // 
+            //
+            ConvertNodeToNVBin(nvRamParam.Item);
+            
 
             //PartitionType partitionType = PartitionType.RO;
             ////
@@ -691,47 +691,6 @@ namespace NVParam.BLL
             Array.Copy(sourceArray, startIndex, subArray, 0, length);
             return subArray;
         }
-
-        /// <summary>
-        /// Find All ItemID
-        /// </summary>
-        /// <param name="node"></param>
-        /// <returns></returns>
-        public List<ushort> FindAllItemIDs(ItemDataNode node)
-        {
-            List<ushort> itemIDs = new List<ushort>();
-
-            ushort parsedID = 0;
-            // 检查当前节点的 ItemID
-            if (TryParseItemID(node.ItemID, out parsedID))
-            {
-                itemIDs.Add(parsedID);
-            }
-
-            // 递归遍历子节点
-            foreach (var childNode in node.Children)
-            {
-                List<ushort> childItemIDs = FindAllItemIDs(childNode);
-                itemIDs.AddRange(childItemIDs);
-            }
-
-            return itemIDs;
-        }
-
-        public bool TryParseItemID(string itemID, out ushort parsedID)
-        {
-            bool isParsed = ushort.TryParse(itemID, out ushort result);
-
-            if (isParsed && result > 0)
-            {
-                parsedID = result;
-                return true;
-            }
-
-            parsedID = 0;
-            return false;
-        }
-
         /// <summary>
         /// Append Item Data Node
         /// </summary>
@@ -858,8 +817,113 @@ namespace NVParam.BLL
         /// <param name="node"></param>
         private void ConvertNodeToNVBin(ItemDataNode node)
         {
-            //
+            if (node == null)
+                return;
+
+            //RW
+            List<SectorInfo> sectors = new List<SectorInfo>();
+            for (int count = 0; count < NVCommon.RWSectorCount; count++)
+            {
+                SectorInfo sectorInfo = new SectorInfo();
+                sectorInfo.Datas = Enumerable.Repeat((byte)0xFF, NVCommon.RWSectorSize * 1024).ToArray();
+                sectors.Add(sectorInfo);
+            }
+
+            List<ItemDataNode> listNodes = node.GetAllNodes();
+            List<ushort> listIDs = FindAllItemIDs(node);
+            SectorInfo current = null;
+            int currentSectorIndex = 0;
+            foreach (var itemID in listIDs)
+            {
+                ItemDataNode itemNode = FindItemDataNodeById(node, itemID);
+                byte[] datas = ConvertToByte(itemNode);
+
+                NVSAte nvsATE = new NVSAte()
+                {
+                    id = itemID,
+                    len = (ushort)datas.Length,
+                    part = 0xFF,
+                    crc8 = CRCCalculator.Calculate(datas),
+                };
+
+                
+
+                //WriteDataToSector(nvsATE, datas, )
+            }
         }
+
+        private BoolQResult WriteDataToSector(NVSAte ate, byte[] data, SectorInfo sector)
+        {
+            // 检查输入数据是否有效
+            if (data == null || sector == null)
+            {
+                return new BoolQResult(false, "NULL");
+            }
+
+            ate.offset = sector.DataIndex;
+            // 计算 Data 数据应该对齐到的偏移量
+            int alignmentOffset = 16 - (sector.DataIndex % 16);
+            // 确保偏移地址在有效范围内
+            if ((ate.offset + data.Length + ate.len ) <= sector.Length)
+            {
+                // 写入 NVSAte 数据
+                byte[] ateData = DataConvert.ConvertToByteArray(ate);
+                Array.Copy(data, 0, sector.Datas, sector.ATEIndex - ateData.Length, ateData.Length);
+
+                // 写入 Data 数据
+                Array.Copy(data, 0, sector.Datas, ate.offset, data.Length);
+
+                sector.ATEIndex = (ushort)(sector.ATEIndex - ateData.Length);
+                sector.DataIndex = (ushort)(sector.DataIndex + data.Length + alignmentOffset);
+                return new BoolQResult(true);
+            }
+            else
+            {
+                // 处理偏移地址超出范围的情况
+                return new BoolQResult(false, "Insufficientlength");
+            }
+        }
+        public bool TryParseItemID(string itemID, out ushort parsedID)
+        {
+            bool isParsed = ushort.TryParse(itemID, out ushort result);
+
+            if (isParsed && result > 0)
+            {
+                parsedID = result;
+                return true;
+            }
+
+            parsedID = 0;
+            return false;
+        }
+
+
+        /// <summary>
+        /// Find All ItemID
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        public List<ushort> FindAllItemIDs(ItemDataNode node)
+        {
+            List<ushort> itemIDs = new List<ushort>();
+
+            ushort parsedID = 0;
+            // 检查当前节点的 ItemID
+            if (TryParseItemID(node.ItemID, out parsedID))
+            {
+                itemIDs.Add(parsedID);
+            }
+
+            // 递归遍历子节点
+            foreach (var childNode in node.Children)
+            {
+                List<ushort> childItemIDs = FindAllItemIDs(childNode);
+                itemIDs.AddRange(childItemIDs);
+            }
+
+            return itemIDs;
+        }
+
 
         #endregion
     }

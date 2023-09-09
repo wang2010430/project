@@ -53,7 +53,7 @@ namespace NVParam.BLL
         /// </summary>
         /// <param name="portParam">The communication port configuration.</param>
         /// <returns>
-        /// A <see cref="BoolQResult"/> indicating the success or failure of the connection.
+        /// indicating the success or failure of the connection.
         /// </returns>
         public BoolQResult ConnectCommunication(ICommPort portParam)
         {

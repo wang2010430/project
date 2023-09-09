@@ -226,10 +226,6 @@
       <Project>{40c5debc-2478-489e-b63d-b9a4290bb30e}</Project>
       <Name>NVParam</Name>
     </ProjectReference>
-    <ProjectReference Include="..\NVSSystem\NVSSystem.csproj">
-      <Project>{b2cb83e6-820f-44d6-bfc0-531fadfc54e6}</Project>
-      <Name>NVSSystem</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">

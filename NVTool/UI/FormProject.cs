@@ -11,8 +11,6 @@ using DevExpress.XtraTreeList.Nodes;
 using log4net;
 using NVParam.BLL;
 using NVParam.DAL;
-using NVSSystem.BLL;
-using NVSSystem.DLL;
 using NVTool.BLL;
 using NVTool.DAL.Model;
 using System;

@@ -9,20 +9,20 @@
 * - 1.0 : Initial version - jinlong.wang
 ***************************************************************************************************/
 
-using System;
-using System.Linq;
-
-namespace NVSSystem.DLL
+namespace NVParam.DAL
 {
     /// <summary>
-    /// NVS Param
+    /// Sector Info
     /// </summary>
-    public class NVSParam
+    public class SectorInfo
     {
-        public int SectorSize = 0;
-        public int SectorCount = 0;
-        public byte[] SectorData;
+        public SectorType Type { get; set; } = SectorType.EmptySector;
+        public int Length
+        {
+            get { return Datas != null ? Datas.Length : 0; }
+        }
+        public byte[] Datas { get; set; }
+        public ushort ATEIndex { get; set; }
+        public ushort DataIndex { get; set; }
     }
-
-
 }

@@ -91,15 +91,16 @@ namespace NVTool.BLL
                         else
                         {
                             if (oldLevel < level)
-                            {             
+                            {
                                 parent.Children.Add(currentNode);
-                                dictItemDataNode[level] = currentNode;
                             }
-                            else 
+                            else
                             {
                                 ItemDataNode node = dictItemDataNode[level - 1];
                                 node.Children.Add(currentNode);
                             }
+                            dictItemDataNode[level] = currentNode;
+
                             oldLevel = level;
                         }
                     }

@@ -1,8 +1,8 @@
 /***************************************************************************************************
 * copyright : 芯迈微半导体（珠海）有限公司
 * version   : 1.00
-* file      : NVSParam.cs
-* date      : 2023/8/5 11:54:42
+* file      : Class1.cs
+* date      : 2023/8/5 8:47:34
 * author    : jinlong.wang
 * brief     : 
 * section Modification History
@@ -10,19 +10,25 @@
 ***************************************************************************************************/
 
 using System;
-using System.Linq;
 
-namespace NVSSystem.DLL
+namespace NVParam.DAL
 {
-    /// <summary>
-    /// NVS Param
-    /// </summary>
-    public class NVSParam
+
+    //ATE 的类型
+    public enum ATEType
     {
-        public int SectorSize = 0;
-        public int SectorCount = 0;
-        public byte[] SectorData;
+        Close,
+        GC,
+        Delete
     }
 
-
+    //分区类型
+    public enum SectorType
+    {
+        OpenSector,
+        CloseSector,
+        WriteSector,
+        EmptySector,
+        NullSector
+    }
 }

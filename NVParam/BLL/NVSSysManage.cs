@@ -11,13 +11,14 @@
 
 using Common;
 using log4net;
-using NVSSystem.DLL;
+using NVParam.DAL;
+using NVParam.Helper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 
-namespace NVSSystem.BLL
+namespace NVParam.BLL
 {
     public class NVSSysManage
     {
@@ -35,6 +36,9 @@ namespace NVSSystem.BLL
         #endregion
 
         #region Normal Function
+
+
+
         private BoolQResult WriteDataToSector(NVSAte ate, byte[] data, SectorInfo sectorInfo)
         {
             // 检查输入数据是否有效

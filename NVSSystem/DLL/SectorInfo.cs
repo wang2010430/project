@@ -14,9 +14,11 @@ namespace NVSSystem.DLL
     /// <summary>
     /// Sector Info
     /// </summary>
-    internal class SectorInfo
+    public class SectorInfo
     {
-        public SectorType type;
-        public byte[] sectorInfo;
+        public SectorType Type { get; set; } = SectorType.EmptySector;
+        public byte[] Datas { get; set; }
+        public int ATEIndex { get; set; }
+        public int DataIndex { get; set; }
     }
 }

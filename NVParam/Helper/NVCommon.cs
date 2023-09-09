@@ -9,6 +9,7 @@
 * - 1.0 : Initial version - jinlong.wang
 ***************************************************************************************************/
 
+using Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +20,16 @@ namespace NVParam.Helper
 {
     public class NVCommon
     {
+        #region Attribute
+        // 大小端配置
+        public static Endian DataEndian = Endian.LittleEndian;
+
+        // NVS Sys
+        public const int ROSectorSize = 56;
+        public const int ROSectorCount = 2;
+        public const int RWSectorSize = 48;
+        public const int RWSectorCount = 3;
+        #endregion
         /// <summary>
         /// 生成ItemID，格式为分区(15-14), 领域(13-10)，其余自定义。
         /// </summary>

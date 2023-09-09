@@ -12,7 +12,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace NVSSystem.DLL
+namespace NVParam.DAL
 {
     /* Allocation Table Entry */
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
