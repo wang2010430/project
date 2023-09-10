@@ -31,6 +31,7 @@ namespace NVTool.DAL.Model
         SaveToPhone,
         //Tool
         ExcelParser,
+        ClearFlag
     }
 
     public class ButtonClickedEventArgs : EventArgs

@@ -8,7 +8,7 @@
 * section Modification History
 * - 1.0 : Initial version - jinlong.wang
 ***************************************************************************************************/
-
+#define PC_DEBUG
 using Channel;
 using CmindProtocol;
 using CmindProtocol.CmindBusiness;
@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace NVParam.BLL
 {
@@ -30,12 +31,9 @@ namespace NVParam.BLL
         private NVRamParam nvRamParam = new NVRamParam();
         public NVRamParam NvRamParam { get => nvRamParam; set => nvRamParam = value; }
         public Cmind CmindProtocol { get; set; } = new Cmind();
-
-        private bool IsLittleEndian = true;
-
-        internal bool IsConnected = false;
         public string ProjectFilePath { get; set; }
 
+        private int ATESize = Marshal.SizeOf(typeof(NVSAte));
         #endregion
 
         #region Constructor
@@ -48,7 +46,7 @@ namespace NVParam.BLL
         #endregion
 
 
-        #region Function
+        #region Normal Function
         /// <summary>
         /// loading source 
         /// </summary>
@@ -71,56 +69,6 @@ namespace NVParam.BLL
                 return new BoolQResult(false, ex.Message);
             }
         }
-
-
-
-        /// <summary>
-        /// Find Item Node byte ItemName
-        /// </summary>
-        /// <param name="parentNode"></param>
-        /// <param name="ItemIndex">child1Name$child2Name</param>
-        /// <returns></returns>
-        public ItemDataNode FindItemNodeByItemIndex(ItemDataNode parentNode, string itemIndex)
-        {
-            string[] itemNames = itemIndex.Split('$');
-
-            // 检查当前节点是否匹配
-            if (parentNode.ItemName == itemNames[0])
-            {
-                // 检查是否已达到最后一个子节点
-                if (itemNames.Length == 1)
-                {
-                    return parentNode;
-                }
-                else
-                {
-                    // 递归查找下一级子节点
-                    foreach (ItemDataNode childNode in parentNode.Children)
-                    {
-                        ItemDataNode foundNode = FindItemNodeByItemIndex(childNode, string.Join("$", itemNames, 1, itemNames.Length - 1));
-                        if (foundNode != null)
-                        {
-                            return foundNode;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                // 在子节点中查找
-                foreach (ItemDataNode childNode in parentNode.Children)
-                {
-                    ItemDataNode foundNode = FindItemNodeByItemIndex(childNode, itemIndex);
-                    if (foundNode != null)
-                    {
-                        return foundNode;
-                    }
-                }
-            }
-
-            return null; // 未找到匹配的节点
-        }
-
         /// <summary>
         /// Upload project
         /// </summary>
@@ -243,168 +191,217 @@ namespace NVParam.BLL
         /// <returns></returns>
         public BoolQResult SaveImageToPhone(Action<string> progressCallBack, string backupFilePath)
         {
-            //backup nvs sys
+            //Backup nvs sys
+            progressCallBack?.Invoke("Backup in progress ......");
             BoolQResult ret = BackupNVSFromBoard(progressCallBack, backupFilePath);
             if (!ret.Result)
             {
                 return ret;
             }
 
-            //
-            ConvertNodeToNVBin(nvRamParam.Item);
-            
+            NVSParam rwNVSParam = null;
+            NVSParam roNVSParam = null;
+            progressCallBack?.Invoke("Convert to Bin in progress ......");
+            ConvertNodeToNVBin(nvRamParam.Item, out rwNVSParam, out roNVSParam);
 
-            //PartitionType partitionType = PartitionType.RO;
-            ////
-            //Action<double> callBack = (progress) =>
-            //{
-            //    string result = progress.ToString("0.00");
-            //    string callbackMsg = $"Write {partitionType} Sectors, Progress = {result}%";
-            //    progressCallBack?.Invoke(callbackMsg);
-            //};
+            NVWriteParam param = new NVWriteParam()
+            {
+                DownloadMode = (byte)NVDownloadMode.NORMAL_MODE,
+                OperationMode = (byte)NVOperateMode.WholeMode,
+            };
 
-            //NVWriteParam param = new NVWriteParam()
-            //{
-            //    DownloadMode = (byte)NVDownloadMode.NORMAL_MODE,
-            //    OperationMode = (byte)NVOperateMode.WholeMode,
-            //};
-
-            ////读取Partition文件
-            //byte[] partitionData = FileUtils.ReadFileBytes("partitionsRO.bin");
-            ////Read RO Sector
-            //param.Length = (uint)partitionData.Length;
-            //param.ItemID = NVCommon.GenerateItemID((byte)partitionType, (byte)Domain.Commmon, 0);
-            //partitionType = PartitionType.RO;
-            //BusinessResult bResult = CmindProtocol.WriteNVItemDataByID(param, callBack, partitionData);
-            //if (bResult.Result == false)
-            //{
-            //    return new BoolQResult(false, $"Write {partitionType.ToString()} Sector Failed: case <{bResult.Msg}>");
-            //}
-
-            ////读取Partition文件
-            //partitionData = FileUtils.ReadFileBytes("partitions.bin");
-            ////Read RW Sector
-            //partitionType = PartitionType.RW;
-            //param.Length = (uint)partitionData.Length;
-            //param.ItemID = NVCommon.GenerateItemID((byte)partitionType, (byte)Domain.Commmon, 0);
-
-            //bResult = CmindProtocol.WriteNVItemDataByID(param, callBack, partitionData);
-            //if (bResult.Result == false)
-            //{
-            //    return new BoolQResult(false, $"Write {partitionType.ToString()} Sector Failed: case <{bResult.Msg}>");
-            //}
-
-            return new BoolQResult(true);
-        }
-        /// <summary>
-        /// 从手机中加载image
-        /// </summary>
-        /// <param name="ItemProgressCallBack"></param>
-        /// <returns></returns>
-        public BoolQResult LoadImageFromPhone(Action<string> ItemProgressCallBack)
-        {
-            PartitionType partitionType = PartitionType.RO;
-            Action<double> progressCallBack = (progress) =>
+            //RW
+            PartitionType partitionType = PartitionType.RW;
+            param.Length = (uint)rwNVSParam.SectorData.Length;
+            param.ItemID = NVCommon.GenerateItemID((byte)partitionType, (byte)Domain.Commmon, 0);
+   
+            Action<double> callBack = (progress) =>
             {
                 string result = progress.ToString("0.00");
-                ItemProgressCallBack?.Invoke($"Read {partitionType} Sectors , Progress = {result}%");
+                string callbackMsg = $"Write {partitionType} Sectors, Progress = {result}%";
+                progressCallBack?.Invoke(callbackMsg);
             };
 
-            NVReadParam param = new NVReadParam()
-            {
-                ItemID = NVCommon.GenerateItemID((byte)partitionType, (byte)Domain.Commmon, 0),
-                OperationMode = (byte)NVOperateMode.WholeMode,
-                Length = 0
-            };
-
-            //读取RO分区
-            ReadNVDataResult bResult = null;
-            bResult = CmindProtocol.ReadNVDataFromPhone(param, progressCallBack);
+            BusinessResult bResult = CmindProtocol.WriteNVItemDataByID(param, callBack, rwNVSParam.SectorData);
             if (bResult.Result == false)
             {
-                return new BoolQResult(false, $"Read From Phone Failed: case <{bResult.Msg}>");
+                return new BoolQResult(false, $"Write {partitionType.ToString()} Sector Failed: case <{bResult.Msg}>");
             }
-            FileUtils.WriteFileBytes(bResult.datas, $"bin/partitionsRO.bin");
 
-            for (int count = 0; count < bResult.sectorCount; count++)
+            return new BoolQResult(true, "Saved bin to phone successfully");
+        }
+
+        /// <summary>
+        /// Loads image data from a phone and processes it.
+        /// </summary>
+        /// <param name="callBack">A callback action to report progress or status.</param>
+        /// <param name="DiffIDs">A list of different IDs that are updated during processing (will be cleared).</param>
+        /// <returns>A BoolQResult indicating the success or failure of the operation.</returns>
+        public BoolQResult LoadImageFromPhone(Action<string> callBack, ref List<int> DiffIDs)
+        {
+            DiffIDs.Clear();
+#if PC_DEBUG
+            ReadNVDataResult rwResult = new ReadNVDataResult()
             {
-                byte[] data = new byte[bResult.sectorSize];
-                Array.Copy(bResult.datas, bResult.sectorSize * count, data, 0, bResult.sectorSize);
-                FileUtils.WriteFileBytes(data, $"bin/partitionsRO{count}.bin");
+                sectorCount = NVCommon.RWSectorCount,
+                sectorSize = NVCommon.RWSectorSize,
+                datas = FileUtils.ReadFileBytes("bin/partitionsRW.bin")
+            };
+#else
+            ReadNVDataResult roResult = ReadSector(callBack, PartitionType.RO);
+            if (roResult.Result == false)
+            {
+                return new BoolQResult(false, $"Read From Phone Failed: case <{roResult.Msg}>");
             }
-
+#if DEBUG
+            SavePartitionROData(roResult, PartitionType.RO);
+#endif
             //读取RW分区
-            partitionType = PartitionType.RW;
-            param.ItemID = NVCommon.GenerateItemID((byte)partitionType, (byte)Domain.Commmon, 0);
-            bResult = CmindProtocol.ReadNVDataFromPhone(param, progressCallBack);
-            if (bResult.Result == false)
+            ReadNVDataResult rwResult = ReadSector(callBack, PartitionType.RW);
+            if (rwResult.Result == false)
             {
-                return new BoolQResult(false, $"Read From Phone Failed: case <{bResult.Msg}>");
+                return new BoolQResult(false, $"Read From Phone Failed: case <{rwResult.Msg}>");
             }
 
-            FileUtils.WriteFileBytes(bResult.datas, $"bin/partitionsRW.bin");
-            for (int count = 0; count < bResult.sectorCount; count++)
-            {
-                byte[] data = new byte[bResult.sectorSize];
-                Array.Copy(bResult.datas, bResult.sectorSize * count, data, 0, bResult.sectorSize);
-                FileUtils.WriteFileBytes(data, $"bin/partitionsRW{count}.bin");
-            }
+#if DEBUG
+            SavePartitionROData(roResult, PartitionType.RW);
+#endif
+#endif
+            Dictionary<int, byte[]> sectorData = ParseSectorData(rwResult);
+            Dictionary<int, byte[]> validData = FindAndHandleNodeDiff(sectorData, nvRamParam.Item);
 
-            NVSParam nvsParam = new NVSParam()
-            {
-                SectorSize = bResult.sectorSize, // bResult.sectorSize,
-                SectorCount = bResult.sectorCount,//bResult.sectorCount,
-                SectorData = bResult.datas//bResult.datas,
-            };
+            DiffIDs = validData.Keys.ToList();
+            return new BoolQResult(true, "Load data from phone successfully");
+        }
 
-            NVSSysManage nvsSysManage = new NVSSysManage();
-            Dictionary<int, byte[]> listItemData = nvsSysManage.ParseFromData(nvsParam);
+        /// <summary>
+        /// Converts item node data to a binary file and saves it.
+        /// </summary>
+        /// <param name="callBack">A callback action to report progress or status.</param>
+        /// <param name="binFilePath">The file path where the binary data will be saved.</param>
+        /// <returns>A BoolQResult indicating the success or failure of the operation.</returns>
+        public BoolQResult ConvertItemNodeToBin(Action<string> callBack, string binFilePath)
+        {
+            // Initialize NVSParam objects for RW and RO sectors.
+            NVSParam rwNVSParam = null;
+            NVSParam roNVSParam = null;
 
+            // Invoke the callback to report progress.
+            callBack?.Invoke("Convert to Bin in progress ......");
+
+            // Convert the item node data to NVSParam format.
+            ConvertNodeToNVBin(nvRamParam.Item, out rwNVSParam, out roNVSParam);
+
+            // Create an NVSStorage instance.
+            NVSStorage nvsStorage = new NVSStorage();
+
+            // Save the data to the specified binary file.
+            BoolQResult ret = nvsStorage.SaveData(binFilePath,
+                NVCommon.ConvertParameter(rwNVSParam, SectorAttribute.RW), NVCommon.ConvertParameter(roNVSParam, SectorAttribute.RO));
+
+            return ret;
+        }
+        #endregion
+
+        #region Common Function
+        /// <summary>
+        /// Finds and handles differences between ItemDataNode IDs and a dictionary of node data.
+        /// </summary>
+        /// <param name="listNodeData">A dictionary containing node data with IDs as keys.</param>
+        /// <param name="parentNode">The parent ItemDataNode to search for child nodes.</param>
+        /// <returns>A dictionary containing valid node data based on differences.</returns>
+        public Dictionary<int, byte[]> FindAndHandleNodeDiff(Dictionary<int, byte[]> listNodeData, ItemDataNode parentNode)
+        {
             List<ushort> listItemID = FindAllItemIDs(nvRamParam.Item);
             List<ushort> listNVSID = new List<ushort>();
 
-            // Get all keys and print them
-            var keys = listItemData.Keys;
+            // Get all keys from listNodeData and convert them to a list of ushort
+            var keys = listNodeData.Keys;
             foreach (int key in keys)
             {
                 listNVSID.Add((ushort)key);
             }
-            var differentValues = listItemID.Except(listNVSID);
+
+            // Find common ItemDataNode IDs between listItemID and listNVSID
+            var differentValues = listItemID.Intersect(listNVSID);
+
+            Dictionary<int, byte[]> validData = new Dictionary<int, byte[]>();
+
             foreach (ushort key in differentValues)
             {
-                LogNetHelper.Debug($"Diff Item = {key}");
-            }
+                // Find the corresponding ItemDataNode by ID
+                ItemDataNode diffNode = FindItemDataNodeById(parentNode, key);
 
-            foreach (var kvp in listItemData)
-            {
-                ushort itemId = (ushort)kvp.Key;
-                byte[] itemData = kvp.Value;
-                if (listItemID.Contains(itemId))
+                // Convert the ItemDataNode to bytes
+                byte[] nodeData = ConvertToByte(diffNode);
+
+                // Check if the byte length matches the expected length
+                if (nodeData.Length == listNodeData[key].Length)
                 {
-                    ItemDataNode node = FindItemDataNodeById(nvRamParam.Item, itemId);
-                    if (node != null)
+#if DEBUG
+                    LogNetHelper.Debug($"NodeData Length = {nodeData.Length}, Key = {listNodeData[key].Length}");
+#endif
+
+                    // Add valid node data to the result dictionary
+                    validData.Add(key, listNodeData[key]);
+
+                    // Set the ItemDataNode values from the byte data
+                    BoolQResult result = SetItemValuesFromBytes(diffNode, listNodeData[key]);
+
+                    // Log a message if setting values fails
+                    if (!result.Result)
                     {
-                        int nodeByteCount = GetTotalByteCount(node);
-                        if (nodeByteCount == itemData.Length)
-                            SetItemValuesFromBytes(node, itemData);
-                        else
-                        {
-                            LogNetHelper.Error($"ItemId = {itemId}, Different lengths NVS:{itemData.Length} Project:{itemData.Length}");
-                        }
-                    }
-                    else
-                    {
-                        LogNetHelper.Error($"ItemId = {itemId}, node is null");
+                        LogNetHelper.Info(result.Msg);
                     }
                 }
                 else
                 {
-                    LogNetHelper.Error($"ItemId = {itemId} is null");
+#if DEBUG
+                    LogNetHelper.Info($"Different NodeData Length = {nodeData.Length}, Key = {listNodeData[key].Length}");
+#endif
                 }
             }
 
+            return validData;
+        }
 
-            return new BoolQResult(true);
+
+        /// <summary>
+        /// Parses sector data retrieved from a ReadNVDataResult and returns a dictionary 
+        /// </summary>
+        /// <param name="result">A ReadNVDataResult object containing sector data.</param>
+        /// <returns>A dictionary representing the parsed sector data.</returns>
+        private Dictionary<int, byte[]> ParseSectorData(ReadNVDataResult result)
+        {
+            // Check if the input parameters are valid
+            if (result == null || result.datas == null || result.datas.Length == 0)
+            {
+                return null;
+            }
+
+            // Create an NVSParam object to pass sector data information
+            NVSParam nvsParam = new NVSParam()
+            {
+                SectorSize = result.sectorSize * 1024,
+                SectorCount = result.sectorCount,
+                SectorData = result.datas
+            };
+
+            // Create an NVSSysManage object for data parsing
+            NVSSysManage nvsSysManage = new NVSSysManage();
+
+            try
+            {
+                // Call the NVSSysManage.ParseFromData method to parse sector data
+                Dictionary<int, byte[]> itemDatas = nvsSysManage.ParseFromData(nvsParam);
+                return itemDatas;
+            }
+            catch (Exception ex)
+            {
+                // Catch exceptions during parsing and log error messages
+                LogNetHelper.Error("Error parsing sector data: " + ex.Message);
+                return null;
+            }
         }
 
         /// <summary>
@@ -419,7 +416,7 @@ namespace NVParam.BLL
             {
                 int byteCount = GetByteCountByType(node.DataType);
                 byte[] itemValue = SubArray(valueBytes, 0, byteCount);
-                if (!IsLittleEndian)
+                if (!(NVCommon.DataEndian == Endian.LittleEndian))
                 {
                     Array.Reverse(itemValue);
                 }
@@ -477,247 +474,33 @@ namespace NVParam.BLL
             }
         }
 
+
         /// <summary>
-        /// File node by ID
+        /// Saves partition data from a ReadNVDataResult to binary files, both as a whole and divided by sectors.
         /// </summary>
-        /// <param name="parentNode"></param>
-        /// <param name="itemId"></param>
-        /// <returns></returns>
-        public ItemDataNode FindItemDataNodeById(ItemDataNode parentNode, int itemId)
+        /// <param name="result">The ReadNVDataResult containing the partition data.</param>
+        /// <param name="type">The type of partition data (e.g., "RO", "RW").</param>
+        public void SavePartitionData(ReadNVDataResult result, PartitionType type)
         {
-            try
+            // Check if the input parameters are valid
+            if (result == null || result.datas == null || result.datas.Length == 0)
             {
-                if (parentNode == null)
-                    return null;
-
-                if (parentNode.ItemID == itemId.ToString())
-                    return parentNode;
-
-                foreach (ItemDataNode childNode in parentNode.Children)
-                {
-                    ItemDataNode foundNode = FindItemDataNodeById(childNode, itemId);
-                    if (foundNode != null)
-                        return foundNode;
-                }
-
-                return null;
+                LogNetHelper.Info("Invalid or empty result object");
+                return;
             }
-            catch (Exception ex)
+
+            // Save the complete partition data
+            FileUtils.WriteFileBytes(result.datas, $"bin/partitions{type}.bin");
+
+            // Split and save the data by sectors
+            for (int count = 0; count < result.sectorCount; count++)
             {
-                Console.WriteLine(ex.Message);
-                return null;
+                byte[] data = new byte[result.sectorSize];
+                Array.Copy(result.datas, result.sectorSize * count, data, 0, result.sectorSize);
+                FileUtils.WriteFileBytes(data, $"bin/partitions{type}{count}.bin");
             }
         }
 
-
-        /// <summary>
-        /// Find data based on ID
-        /// </summary>
-        private ItemDataNode FindItemDataNodeByNodeID(ItemDataNode parentNode, int ID)
-        {
-            try
-            {
-                if (parentNode == null)
-                    return null;
-
-                if (parentNode.ID == ID)
-                    return parentNode;
-
-                foreach (ItemDataNode childNode in parentNode.Children)
-                {
-                    ItemDataNode foundNode = FindItemDataNodeByNodeID(childNode, ID);
-                    if (foundNode != null)
-                        return foundNode;
-                }
-
-                return null;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Get New Item ID
-        /// </summary>
-        /// <param name="node"></param>
-        /// <returns></returns>
-        public int GetNewItemID(ItemDataNode node)
-        {
-            List<ItemDataNode> listNode = node.GetAllNodes();
-            return (listNode.Max(item => item.ID) + 1);
-        }
-
-        /// <summary>
-        /// Convert node value to byte[]
-        /// </summary>
-        /// <param name="node"></param>
-        /// <returns></returns>
-        public byte[] ConvertToByte(ItemDataNode node)
-        {
-            List<byte> byteList = new List<byte>();
-
-            // Convert the value of the current node to little endian byte array
-            byte[] valueBytes = null;
-            switch (node.DataType)
-            {
-                case EDataType.BYTE:
-                    valueBytes = new byte[] { byte.Parse(node.ItemValue) };
-                    break;
-                case EDataType.SBYTE:
-                    sbyte sbyteValue = sbyte.Parse(node.ItemValue);
-                    valueBytes = new byte[] { (byte)sbyteValue };
-                    break;
-                case EDataType.SHORT:
-                    short shortValue = short.Parse(node.ItemValue);
-                    valueBytes = BitConverter.GetBytes(shortValue);
-                    break;
-                case EDataType.USHORT:
-                    ushort ushortValue = ushort.Parse(node.ItemValue);
-                    valueBytes = BitConverter.GetBytes(ushortValue);
-                    break;
-                case EDataType.INT:
-                    int intValue = int.Parse(node.ItemValue);
-                    valueBytes = BitConverter.GetBytes(intValue);
-                    break;
-                case EDataType.UINT:
-                    uint uintValue = uint.Parse(node.ItemValue);
-                    valueBytes = BitConverter.GetBytes(uintValue);
-                    break;
-                case EDataType.LONG:
-                    long longValue = long.Parse(node.ItemValue);
-                    valueBytes = BitConverter.GetBytes(longValue);
-                    break;
-                default:
-                    // Handle unknown data type
-                    break;
-            }
-
-            if (valueBytes != null)
-            {
-                if (!IsLittleEndian)
-                {
-                    Array.Reverse(valueBytes);
-                }
-
-                byteList.AddRange(valueBytes);
-            }
-
-            // Recursively process child nodes
-            foreach (ItemDataNode childNode in node.Children)
-            {
-                byte[] childBytes = ConvertToByte(childNode);
-                byteList.AddRange(childBytes);
-            }
-
-            return byteList.ToArray();
-        }
-
-        /// <summary>
-        /// get the length of node
-        /// </summary>
-        /// <param name="node">data node</param>
-        /// <returns>byte count</returns>
-        public int GetTotalByteCount(ItemDataNode node)
-        {
-            int totalByteCount = 0;
-
-            try
-            {
-                if (node != null)
-                {
-                    // 计算当前节点的 ItemValue 的字节数
-                    int currentNodeByteCount = GetByteCountByType(node.DataType);
-
-                    totalByteCount += currentNodeByteCount;
-
-                    // 遍历当前节点的子节点，并累加子节点的字节数
-                    foreach (ItemDataNode childNode in node.Children)
-                    {
-                        int childNodeByteCount = GetTotalByteCount(childNode);
-                        totalByteCount += childNodeByteCount;
-                    }
-                }
-
-                return totalByteCount;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return 0;
-            }
-        }
-
-        /// <summary>
-        /// Get byte count
-        /// </summary>
-        /// <param name="EDataType"></param>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        public int GetByteCountByType(EDataType dataType)
-        {
-            switch (dataType)
-            {
-                case EDataType.BYTE:
-                case EDataType.SBYTE:
-                    return sizeof(byte);
-                case EDataType.SHORT:
-                case EDataType.USHORT:
-                    return sizeof(ushort);
-                case EDataType.INT:
-                case EDataType.UINT:
-                    return sizeof(uint);
-                case EDataType.LONG:
-                    return sizeof(long);
-                default:
-                    // Handle unknown data type
-                    // None
-                    return 0;
-            }
-        }
-
-        /// <summary>
-        /// 截取字节数组的前几个字节
-        /// </summary>
-        /// <param name="sourceArray"></param>
-        /// <param name="startIndex"></param>
-        /// <param name="length"></param>
-        /// <returns></returns>
-        public byte[] SubArray(byte[] sourceArray, int startIndex, int length)
-        {
-            byte[] subArray = new byte[length];
-            Array.Copy(sourceArray, startIndex, subArray, 0, length);
-            return subArray;
-        }
-        /// <summary>
-        /// Append Item Data Node
-        /// </summary>
-        /// <param name="parentID"></param>
-        /// <param name="childNode"></param>
-        /// <returns></returns>
-        public BoolQResult AppendItemDataNode(int parentID, ItemDataNode childNode)
-        {
-            if (nvRamParam.Item == null)
-            {
-                return new BoolQResult(false, "ItemData is Null");
-            }
-
-            // 找到父节点ID为3的节点
-            ItemDataNode parentNode = FindItemDataNodeByNodeID(nvRamParam.Item, parentID);
-            if (nvRamParam.Item == null)
-            {
-                return new BoolQResult(false, "Parent node not found");
-            }
-
-            parentNode.AddChild(childNode);
-
-            return new BoolQResult(true, "Add child node successfully");
-        }
-        #endregion
-
-        #region Common Function
 
         /// <summary>
         /// Reads a  sector from the specified partition and reports progress.
@@ -815,24 +598,29 @@ namespace NVParam.BLL
         /// 
         /// </summary>
         /// <param name="node"></param>
-        private void ConvertNodeToNVBin(ItemDataNode node)
+        public BoolQResult ConvertNodeToNVBin(ItemDataNode node, out NVSParam rwParam, out NVSParam roParam)
         {
             if (node == null)
-                return;
+            {
+                rwParam = default;
+                roParam = default;
+                return new BoolQResult(true, "Node is NULL");
+            }
 
             //RW
             List<SectorInfo> sectors = new List<SectorInfo>();
             for (int count = 0; count < NVCommon.RWSectorCount; count++)
             {
                 SectorInfo sectorInfo = new SectorInfo();
-                sectorInfo.Datas = Enumerable.Repeat((byte)0xFF, NVCommon.RWSectorSize * 1024).ToArray();
+                sectorInfo.Datas = Enumerable.Repeat((byte)0xFF, NVCommon.RWSectorSize* 1024).ToArray();
+                sectorInfo.ATEIndex = (ushort)sectorInfo.Length;
                 sectors.Add(sectorInfo);
             }
 
-            List<ItemDataNode> listNodes = node.GetAllNodes();
             List<ushort> listIDs = FindAllItemIDs(node);
-            SectorInfo current = null;
-            int currentSectorIndex = 0;
+            int curIndex = 0;
+            SectorInfo curSectorInfo = sectors[curIndex];
+          
             foreach (var itemID in listIDs)
             {
                 ItemDataNode itemNode = FindItemDataNodeById(node, itemID);
@@ -846,12 +634,54 @@ namespace NVParam.BLL
                     crc8 = CRCCalculator.Calculate(datas),
                 };
 
-                
+                if ((ATESize + datas.Length) >= curSectorInfo.GetRemainingSpace())
+                {
+                    curIndex++;
+                    curSectorInfo = sectors[curIndex];
+                }
 
-                //WriteDataToSector(nvsATE, datas, )
+                WriteDataToSector(nvsATE, datas, curSectorInfo);
             }
+
+
+            curIndex = 0;
+       
+            List<byte[]> sectorData = new List<byte[]>();
+            foreach (var sectorInfo in sectors)
+            {
+                sectorData.Add(sectorInfo.Datas);
+#if DEBUG
+                FileUtils.WriteFileBytes(sectorInfo.Datas, $"Partition{curIndex}.bin");
+                curIndex++;
+#endif
+            }
+            rwParam = new NVSParam()
+            {
+                SectorCount = NVCommon.RWSectorCount,
+                SectorSize = NVCommon.RWSectorSize,
+                SectorData = sectorData.SelectMany(data => data).ToArray()
+            };
+
+            //RO
+            byte[] ROData = Enumerable.Repeat((byte)0xFF, NVCommon.ROSectorCount * NVCommon.ROSectorSize * 1024).ToArray();
+            roParam = new NVSParam()
+            {
+                SectorCount = NVCommon.ROSectorCount,
+                SectorSize = NVCommon.ROSectorSize,
+                SectorData = ROData
+            };
+
+
+            return new BoolQResult(true, "Convert Successed!");
         }
 
+        /// <summary>
+        /// Writes data to a sector, considering alignment requirements.
+        /// </summary>
+        /// <param name="ate">The NVSAte structure to write.</param>
+        /// <param name="data">The data to write.</param>
+        /// <param name="sector">The SectorInfo representing the sector to write to.</param>
+        /// <returns>A BoolQResult indicating whether the write operation was successful.</returns>
         private BoolQResult WriteDataToSector(NVSAte ate, byte[] data, SectorInfo sector)
         {
             // 检查输入数据是否有效
@@ -861,14 +691,16 @@ namespace NVParam.BLL
             }
 
             ate.offset = sector.DataIndex;
+
             // 计算 Data 数据应该对齐到的偏移量
-            int alignmentOffset = 16 - (sector.DataIndex % 16);
+            int alignmentOffset = data.Length % 16 != 0 ? 16 - (data.Length % 16) : 0;
+
             // 确保偏移地址在有效范围内
-            if ((ate.offset + data.Length + ate.len ) <= sector.Length)
+            if ((ate.offset + data.Length + ate.len + alignmentOffset) <= sector.Length)
             {
                 // 写入 NVSAte 数据
                 byte[] ateData = DataConvert.ConvertToByteArray(ate);
-                Array.Copy(data, 0, sector.Datas, sector.ATEIndex - ateData.Length, ateData.Length);
+                Array.Copy(ateData, 0, sector.Datas, sector.ATEIndex - ATESize, ATESize);
 
                 // 写入 Data 数据
                 Array.Copy(data, 0, sector.Datas, ate.offset, data.Length);
@@ -880,9 +712,79 @@ namespace NVParam.BLL
             else
             {
                 // 处理偏移地址超出范围的情况
+                LogNetHelper.Warn("Insufficientlength");
                 return new BoolQResult(false, "Insufficientlength");
             }
         }
+
+        /// <summary>
+        /// Converts the value of an ItemDataNode and its child nodes to byte array.
+        /// </summary>
+        /// <param name="node">The ItemDataNode to convert.</param>
+        /// <returns>A little endian byte array representing the converted value.</returns>
+        public byte[] ConvertToByte(ItemDataNode node)
+        {
+            List<byte> byteList = new List<byte>();
+
+            // Convert the value of the current node to byte array
+            byte[] valueBytes = null;
+            switch (node.DataType)
+            {
+                case EDataType.BYTE:
+                    valueBytes = new byte[] { byte.Parse(node.ItemValue) };
+                    break;
+                case EDataType.SBYTE:
+                    sbyte sbyteValue = sbyte.Parse(node.ItemValue);
+                    valueBytes = new byte[] { (byte)sbyteValue };
+                    break;
+                case EDataType.SHORT:
+                    short shortValue = short.Parse(node.ItemValue);
+                    valueBytes = BitConverter.GetBytes(shortValue);
+                    break;
+                case EDataType.USHORT:
+                    ushort ushortValue = ushort.Parse(node.ItemValue);
+                    valueBytes = BitConverter.GetBytes(ushortValue);
+                    break;
+                case EDataType.INT:
+                    int intValue = int.Parse(node.ItemValue);
+                    valueBytes = BitConverter.GetBytes(intValue);
+                    break;
+                case EDataType.UINT:
+                    uint uintValue = uint.Parse(node.ItemValue);
+                    valueBytes = BitConverter.GetBytes(uintValue);
+                    break;
+                case EDataType.LONG:
+                    long longValue = long.Parse(node.ItemValue);
+                    valueBytes = BitConverter.GetBytes(longValue);
+                    break;
+                default:
+                    // Handle unknown data type, you may want to log an error or throw an exception
+#if DEBUG
+                    //LogNetHelper.Error($"Unknown data type: {node.DataType}");
+#endif
+                    break;
+            }
+
+            if (valueBytes != null)
+            {
+                if (!(NVCommon.DataEndian == Endian.LittleEndian))
+                {
+                    Array.Reverse(valueBytes);
+                }
+
+                byteList.AddRange(valueBytes);
+            }
+
+            // Recursively process child nodes
+            foreach (ItemDataNode childNode in node.Children)
+            {
+                byte[] childBytes = ConvertToByte(childNode);
+                byteList.AddRange(childBytes);
+            }
+
+            return byteList.ToArray();
+        }
+
         public bool TryParseItemID(string itemID, out ushort parsedID)
         {
             bool isParsed = ushort.TryParse(itemID, out ushort result);
@@ -924,6 +826,227 @@ namespace NVParam.BLL
             return itemIDs;
         }
 
+
+        /// <summary>
+        /// Find data based on ID
+        /// </summary>
+        private ItemDataNode FindItemDataNodeByNodeID(ItemDataNode parentNode, int ID)
+        {
+            try
+            {
+                if (parentNode == null)
+                    return null;
+
+                if (parentNode.ID == ID)
+                    return parentNode;
+
+                foreach (ItemDataNode childNode in parentNode.Children)
+                {
+                    ItemDataNode foundNode = FindItemDataNodeByNodeID(childNode, ID);
+                    if (foundNode != null)
+                        return foundNode;
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+        }
+        /// <summary>
+        /// Get New Item ID
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        public int GetNewItemID(ItemDataNode node)
+        {
+            List<ItemDataNode> listNode = node.GetAllNodes();
+            return (listNode.Max(item => item.ID) + 1);
+        }
+
+        /// <summary>
+        /// 截取字节数组的前几个字节
+        /// </summary>
+        /// <param name="sourceArray"></param>
+        /// <param name="startIndex"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        public byte[] SubArray(byte[] sourceArray, int startIndex, int length)
+        {
+            byte[] subArray = new byte[length];
+            Array.Copy(sourceArray, startIndex, subArray, 0, length);
+            return subArray;
+        }
+        /// <summary>
+        /// Append Item Data Node
+        /// </summary>
+        /// <param name="parentID"></param>
+        /// <param name="childNode"></param>
+        /// <returns></returns>
+        public BoolQResult AppendItemDataNode(int parentID, ItemDataNode childNode)
+        {
+            if (nvRamParam.Item == null)
+            {
+                return new BoolQResult(false, "ItemData is Null");
+            }
+
+            // 找到父节点ID为3的节点
+            ItemDataNode parentNode = FindItemDataNodeByNodeID(nvRamParam.Item, parentID);
+            if (nvRamParam.Item == null)
+            {
+                return new BoolQResult(false, "Parent node not found");
+            }
+
+            parentNode.AddChild(childNode);
+
+            return new BoolQResult(true, "Add child node successfully");
+        }
+        /// <summary>
+        /// File node by ID
+        /// </summary>
+        /// <param name="parentNode"></param>
+        /// <param name="itemId"></param>
+        /// <returns></returns>
+        public ItemDataNode FindItemDataNodeById(ItemDataNode parentNode, int itemId)
+        {
+            try
+            {
+                if (parentNode == null)
+                    return null;
+
+                if (parentNode.ItemID == itemId.ToString())
+                    return parentNode;
+
+                foreach (ItemDataNode childNode in parentNode.Children)
+                {
+                    ItemDataNode foundNode = FindItemDataNodeById(childNode, itemId);
+                    if (foundNode != null)
+                        return foundNode;
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Get byte count
+        /// </summary>
+        /// <param name="EDataType"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public int GetByteCountByType(EDataType dataType)
+        {
+            switch (dataType)
+            {
+                case EDataType.BYTE:
+                case EDataType.SBYTE:
+                    return sizeof(byte);
+                case EDataType.SHORT:
+                case EDataType.USHORT:
+                    return sizeof(ushort);
+                case EDataType.INT:
+                case EDataType.UINT:
+                    return sizeof(uint);
+                case EDataType.LONG:
+                    return sizeof(long);
+                default:
+                    // Handle unknown data type
+                    // None
+                    return 0;
+            }
+        }
+        /// <summary>
+        /// get the length of node
+        /// </summary>
+        /// <param name="node">data node</param>
+        /// <returns>byte count</returns>
+        public int GetTotalByteCount(ItemDataNode node)
+        {
+            int totalByteCount = 0;
+
+            try
+            {
+                if (node != null)
+                {
+                    // 计算当前节点的 ItemValue 的字节数
+                    int currentNodeByteCount = GetByteCountByType(node.DataType);
+
+                    totalByteCount += currentNodeByteCount;
+
+                    // 遍历当前节点的子节点，并累加子节点的字节数
+                    foreach (ItemDataNode childNode in node.Children)
+                    {
+                        int childNodeByteCount = GetTotalByteCount(childNode);
+                        totalByteCount += childNodeByteCount;
+                    }
+                }
+
+                return totalByteCount;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return 0;
+            }
+        }
+
+
+
+        /// <summary>
+        /// Find Item Node byte ItemName
+        /// </summary>
+        /// <param name="parentNode"></param>
+        /// <param name="ItemIndex">child1Name$child2Name</param>
+        /// <returns></returns>
+        public ItemDataNode FindItemNodeByItemIndex(ItemDataNode parentNode, string itemIndex)
+        {
+            string[] itemNames = itemIndex.Split('$');
+
+            // 检查当前节点是否匹配
+            if (parentNode.ItemName == itemNames[0])
+            {
+                // 检查是否已达到最后一个子节点
+                if (itemNames.Length == 1)
+                {
+                    return parentNode;
+                }
+                else
+                {
+                    // 递归查找下一级子节点
+                    foreach (ItemDataNode childNode in parentNode.Children)
+                    {
+                        ItemDataNode foundNode = FindItemNodeByItemIndex(childNode, string.Join("$", itemNames, 1, itemNames.Length - 1));
+                        if (foundNode != null)
+                        {
+                            return foundNode;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // 在子节点中查找
+                foreach (ItemDataNode childNode in parentNode.Children)
+                {
+                    ItemDataNode foundNode = FindItemNodeByItemIndex(childNode, itemIndex);
+                    if (foundNode != null)
+                    {
+                        return foundNode;
+                    }
+                }
+            }
+
+            return null; // 未找到匹配的节点
+        }
+
+   
 
         #endregion
     }

@@ -72,7 +72,7 @@ namespace NVParam.BLL
             // 将数据分成n个分区
             for (int i = 0; i < param.SectorCount; i++)
             {
-                byte[] partitions = NVSCommon.GetSubArray(param.SectorData, i * param.SectorSize, param.SectorSize);
+                byte[] partitions = NVCommon.GetSubArray(param.SectorData, i * param.SectorSize, param.SectorSize);
                 SectorType type = GetSectorType(partitions);
                 SectorInfo sectorInfo = new SectorInfo()
                 {
@@ -127,10 +127,10 @@ namespace NVParam.BLL
                     int itemId = listAte[count].id;
                     int length = listAte[count].len;
                     int offset = listAte[count].offset;
-                    byte[] itemData = NVSCommon.GetSubArray(sector, offset, length);
+                    byte[] itemData = NVCommon.GetSubArray(sector, offset, length);
                     if (itemData != null)
                     {
-                        NVSCommon.AddOrUpdateValue(listValue, itemId, itemData);
+                        NVCommon.AddOrUpdateValue(listValue, itemId, itemData);
                     }
                     else
                     {
@@ -147,7 +147,7 @@ namespace NVParam.BLL
             try
             {
                 // 初始化closeATE
-                byte[] dataAte = NVSCommon.GetSubArray(sector, (sector.Length - ateSize), ateSize);
+                byte[] dataAte = NVCommon.GetSubArray(sector, (sector.Length - ateSize), ateSize);
                 if (dataAte == null)
                 {
                     return;
@@ -167,7 +167,7 @@ namespace NVParam.BLL
                     tempAte = ByteArrayToStructure<NVSAte>(ateData);
                     byte[] itemData = new byte[tempAte.len];
                     Buffer.BlockCopy(sector, tempAte.offset, itemData, 0, tempAte.len);
-                    NVSCommon.AddOrUpdateValue(listValue, tempAte.id, itemData);
+                    NVCommon.AddOrUpdateValue(listValue, tempAte.id, itemData);
                 }
             }
             catch (Exception ex)
@@ -247,7 +247,7 @@ namespace NVParam.BLL
             }
 
             //get the ate
-            byte[] dataAte = NVSCommon.GetSubArray(sector, (sector.Length - ateSize), ateSize);
+            byte[] dataAte = NVCommon.GetSubArray(sector, (sector.Length - ateSize), ateSize);
             if (dataAte == null)
             {
                 return SectorType.EmptySector;

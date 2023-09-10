@@ -21,7 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <IntermediateOutputPath>C:\Users\JINLON~1.WAN\AppData\Local\Temp\vsA10.tmp\Debug\</IntermediateOutputPath>
+    <IntermediateOutputPath>C:\Users\86131\AppData\Local\Temp\vs1E7.tmp\Debug\</IntermediateOutputPath>
     <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -31,7 +31,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <IntermediateOutputPath>C:\Users\JINLON~1.WAN\AppData\Local\Temp\vsA10.tmp\Release\</IntermediateOutputPath>
+    <IntermediateOutputPath>C:\Users\86131\AppData\Local\Temp\vs1E7.tmp\Release\</IntermediateOutputPath>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">

@@ -30,6 +30,14 @@ namespace NVTool.BLL
         Save
     }
 
+    enum ColumnName
+    {
+        ItemName,
+        ItemID,
+        ItemValue,
+        Content
+    }
+
     internal static class ProjectCommon
     {
         /// <summary>

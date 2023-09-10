@@ -20,6 +20,7 @@ using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using NVTool.Helper;
 using NVTool.DAL;
+using log4net;
 
 namespace NVTool.BLL
 {
@@ -54,6 +55,10 @@ namespace NVTool.BLL
 
                     if (!string.IsNullOrEmpty(itemName))
                     {
+                        if (itemName == "lte_band_index[24]")
+                        {
+                            LogNetHelper.Info("I am Here");
+                        }
                         List<int> arrayLengths;
                         string arrayName;
                         EDataType dataType = (EDataType)Enum.Parse(typeof(EDataType), row[ExcelClumnName.Type.ToString()].ToString());
@@ -111,9 +116,6 @@ namespace NVTool.BLL
 
             ItemDataNodeHelper nodeHelper = new ItemDataNodeHelper();
             nodeHelper.AssignIDsAndParentIDs(rootNode);
-
-            ConverterClassToNode.PrintNode(rootNode);
-
             return rootNode;
         }
 
@@ -329,6 +331,7 @@ namespace NVTool.BLL
         public void ProcessClassArraysRecursively(ItemDataNode parentNode)
         {
             // 检查父节点的 DataType 是否为 Class
+            List<ItemDataNode> NewChildren = new List<ItemDataNode>();
             if (parentNode.DataType == EDataType.Class)
             {
                 List<int> arrayLengths;
@@ -352,18 +355,25 @@ namespace NVTool.BLL
                         {
                             ItemDataNode newNode = ItemDataNode.CloneItemDataNode(currentNode);
                             newNode.ItemName = arrayName + "[" + count + "]";
-                            parentNode.Children.Add(newNode);
+                            foreach (var ItemNode in newNode.Children)
+                            {
+                                ProcessClassArraysRecursively(ItemNode);
+                            }
+                            NewChildren.Add(newNode);
                         }
                     }
-             
                 }
             }
 
             // 递归处理子节点
             foreach (var childNode in parentNode.Children)
             {
-                foreach(var ItemNode in childNode.Children)
-                    ProcessClassArraysRecursively(ItemNode);
+                ProcessClassArraysRecursively(childNode);
+            }
+
+            foreach (var childNode in NewChildren)
+            {
+                parentNode.AddChild(childNode);
             }
         }
         #endregion

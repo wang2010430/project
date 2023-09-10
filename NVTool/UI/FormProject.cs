@@ -27,16 +27,19 @@ namespace NVTool.UI
         #region Attribute
         private NVRamManage nvRamManage;
         public Form parentForm { get; set; }
-
         private ComParam comParam = null;
-
         private Dictionary<TreeListNode, object> originalValues; // 用于记录每个节点的原始值
         // 声明状态转换的事件
         private NVState currentState = NVState.Disconnected;
 
         public event EventHandler<StateChangedEventArgs> StateChanged;
 
-        //log Message
+        #region Update Flag
+        private List<int> UpdateIDs = new List<int>();
+        #endregion
+
+
+        #region Log Message
         bool IsTabPageCommMessageSelect = false;   // 通信Tab页选中标记
         bool IsMessageCapture = false;             // 通信报文捕获标记
         string MesaageCaptrurePath = string.Empty; // 通信报文捕获路径
@@ -44,6 +47,8 @@ namespace NVTool.UI
         private const int MaxLines = 1000; // 最大行数
         StreamWriter wr;
         FileStream fs;
+        #endregion
+
         #endregion
 
         #region Constructor
@@ -252,7 +257,7 @@ namespace NVTool.UI
         private void TreeList_CustomDrawNodeCell(object sender, CustomDrawNodeCellEventArgs e)
         {
             // 只有在"ItemValue"列的值更改时，才将行的字体颜色更改为红色
-            if ((e.Column.FieldName == "ItemValue" || e.Column.FieldName == "ItemID") && e.Node != null)
+            if ((e.Column.FieldName == "ItemValue") && e.Node != null)
             {
                 object value = e.CellValue;
                 if (value != null && int.TryParse(value.ToString(), out int intValue))
@@ -274,6 +279,19 @@ namespace NVTool.UI
                     e.Appearance.ForeColor = treeListNVParam.Appearance.FocusedCell.ForeColor; // 恢复默认颜色
                 }
             }
+            // 检查是否是 ItemID 列
+            else if (e.Column.FieldName == "ItemID" && e.Node != null)
+            {
+                // 检查 e.CellValue 是否不为空，且能够成功转换为整数
+                if (e.CellValue != null && int.TryParse(e.CellValue.ToString(), out int itemID))
+                {
+                    // 检查 ItemID 是否在 UpdateIDs 列表中
+                    if (UpdateIDs.Contains(itemID))
+                    {
+                        e.Appearance.ForeColor = Color.Red;
+                    }
+                }
+            }
         }
 
         private void TreeList_PopupMenuShowing(object sender, PopupMenuShowingEventArgs e)
@@ -284,10 +302,12 @@ namespace NVTool.UI
                 DXMenuItem addItem = new DXMenuItem("Add Node", AddNode_Click);
                 DXMenuItem addChildItem = new DXMenuItem("Add Child Node", AddChildNode_Click);
                 DXMenuItem deleteItem = new DXMenuItem("Delete Node", this.DeleteNode_Click);
+                DXMenuItem clearItem = new DXMenuItem("Clear", this.Clear_Click);
 
                 e.Menu.Items.Add(addItem);
                 e.Menu.Items.Add(addChildItem);
                 e.Menu.Items.Add(deleteItem);
+                e.Menu.Items.Add(clearItem);
             }
         }
 
@@ -412,35 +432,6 @@ namespace NVTool.UI
             }
         }
 
-        #region Tool
-        private void ExcelParserHandle()
-        {
-            try
-            {
-                string filePath = ProjectCommon.FileDialog(EDiagType.Select, EDiagFileType.excel);
-                if (string.IsNullOrEmpty(filePath))
-                {
-                    return;
-                }
-
-                ExcelParser excelParser = new ExcelParser();
-                ItemDataNode node;
-                BoolQResult ret = excelParser.ExcelToItemNode(filePath, out node);
-
-                if (ret.Result)
-                {
-                    nvRamManage.NvRamParam.Item = node;
-                    UpdateTreelist();
-                }
-                ProjectCommon.ShowMessage(ret);
-            }
-            catch (Exception ex)
-            {
-                ProjectCommon.ShowMessage(new BoolQResult(false, ex.Message));
-            }
-        }
-        #endregion
-
         /// <summary>
         /// Stop Communication
         /// </summary>
@@ -460,13 +451,16 @@ namespace NVTool.UI
             }
         }
 
-
         #region NVS Handle
         /// <summary>
         /// Load NV bin
         /// </summary>
         private void LoadImage()
         {
+            if (!IsProjectFileLoaded(nvRamManage.ProjectFilePath))
+                return;
+
+            GlobalEventHandler.TriggerrunMsgEvent("Start to Load From Phone");
             StorageParam ROParam = new StorageParam();
             StorageParam RWParam = new StorageParam();
 
@@ -474,7 +468,6 @@ namespace NVTool.UI
             BoolQResult bResult = nvsSystem.ReadData("NVSImage.bin", ROParam, RWParam);
 
             ProjectCommon.ShowMessage(bResult, true);
-
         }
 
         /// <summary>
@@ -482,20 +475,30 @@ namespace NVTool.UI
         /// </summary>
         private void LoadFromPhone()
         {
-            // 启动一个任务
+            if (!IsProjectFileLoaded(nvRamManage.ProjectFilePath))
+                return;
+
+            //if (!IsCommConnect())
+            //    return;
+
+
             GlobalEventHandler.TriggerrunMsgEvent("Start to Load From Phone");
             ShowSplashScreen("Please Waiting!", "Loading From Phone in progress");
             Task.Run(() =>
             {
-                //
                 Action<string> progressCallBack = (msg) =>
                 {
                     // 处理进度更新的逻辑
                     ShowSplashTips("Please Waiting!", msg);
                 };
 
-                BoolQResult bResult = nvRamManage.LoadImageFromPhone(progressCallBack);
-                ProjectCommon.ShowMessage(bResult, false);
+                BoolQResult ret = nvRamManage.LoadImageFromPhone(progressCallBack, ref UpdateIDs);
+                if(ret.Result)
+                {
+                    UpdateTreelist();
+                }
+             
+                ProjectCommon.ShowMessage(ret);
 
                 CloseSplashScreen();
                 GlobalEventHandler.TriggerrunMsgEvent("End to Load From Phone");
@@ -507,33 +510,37 @@ namespace NVTool.UI
         /// </summary>
         private void SaveImage()
         {
-            //read File 
-            byte[] ROData = FileUtils.ReadFileBytes("partitionsRO.bin");
-            ushort crc = Crc16Calculator.Calculate(ROData);
-            StorageParam ROParam = new StorageParam()
+            try
             {
-                SAttribute = SectorAttribute.RO,
-                SectorCount = 2,
-                SectorSize = 56 * 1024,
-                CRC = crc,
-                SectorData = ROData
-            };
+                if (!IsProjectFileLoaded(nvRamManage.ProjectFilePath))
+                    return;
 
-            byte[] RWData = FileUtils.ReadFileBytes("partitionsRW.bin");
-            crc = Crc16Calculator.Calculate(RWData);
-            StorageParam RWParam = new StorageParam()
+                string binFile = ProjectCommon.FileDialog(EDiagType.Save, EDiagFileType.bin);
+                if (string.IsNullOrEmpty(binFile))
+                {
+                    return;
+                }
+
+                ShowSplashScreen("Please Waiting!", "Saving Image .....");
+                Task.Run(() =>
+                {
+                    Action<string> progressCallBack = (msg) =>
+                    {
+                        // 处理进度更新的逻辑
+                        ShowSplashTips("Please Waiting!", msg);
+                    };
+
+                    BoolQResult ret = nvRamManage.ConvertItemNodeToBin(progressCallBack, binFile);
+
+                    CloseSplashScreen();
+
+                    ProjectCommon.ShowMessage(ret);
+                });
+            }
+            catch (Exception ex)
             {
-                SAttribute = SectorAttribute.RW,
-                SectorCount = 3,
-                SectorSize = 48 * 1024,
-                CRC = crc,
-                SectorData = RWData
-            };
-
-            NVSStorage nvsSystem = new NVSStorage();
-            BoolQResult bResult = nvsSystem.SaveData("NVSImage.bin", ROParam, RWParam);
-
-            ProjectCommon.ShowMessage(bResult);
+                ProjectCommon.ShowMessage(new BoolQResult(false, ex.Message));
+            }
         }
 
         /// <summary>
@@ -562,11 +569,40 @@ namespace NVTool.UI
                 };
                 BoolQResult bResult = nvRamManage.SaveImageToPhone(progressCallBack, backFilePath);
 
-
                 CloseSplashScreen();
 
                 ProjectCommon.ShowMessage(bResult);
             });
+        }
+        #endregion
+
+
+        #region Tool
+        private void ExcelParserHandle()
+        {
+            try
+            {
+                string filePath = ProjectCommon.FileDialog(EDiagType.Select, EDiagFileType.excel);
+                if (string.IsNullOrEmpty(filePath))
+                {
+                    return;
+                }
+
+                ExcelParser excelParser = new ExcelParser();
+                ItemDataNode node;
+                BoolQResult ret = excelParser.ExcelToItemNode(filePath, out node);
+
+                if (ret.Result)
+                {
+                    nvRamManage.NvRamParam.Item = node;
+                    UpdateTreelist();
+                }
+                ProjectCommon.ShowMessage(ret);
+            }
+            catch (Exception ex)
+            {
+                ProjectCommon.ShowMessage(new BoolQResult(false, ex.Message));
+            }
         }
         #endregion
 
@@ -764,6 +800,7 @@ namespace NVTool.UI
                 LogNetHelper.Error(ex);
             }
         }
+
         #endregion
 
         #region Clicked Function
@@ -848,6 +885,20 @@ namespace NVTool.UI
                     treeListNVParam.DeleteNode(clickedNode);
                 }
             }
+        }
+
+        /// <summary>
+        /// Event handler for the "Clear" button click event.
+        /// Clears the UpdateIDs and originalValues collections.
+        /// </summary>
+        /// <param name="sender">The object that triggered the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void Clear_Click(object sender, EventArgs e)
+        {
+            UpdateIDs.Clear();
+            originalValues.Clear();
+            // 刷新 TreeList 视图
+            treeListNVParam.Refresh();
         }
 
         /// <summary>

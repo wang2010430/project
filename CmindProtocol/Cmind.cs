@@ -681,11 +681,34 @@ namespace CmindProtocol
             {
                 return BResult;
             }
+            else
+            {
+                if (param.OperationMode == (byte)NVOperateMode.WholeMode)
+                {
+                    if (((param.ItemID >> 13) & 0x03) == 0x0) //RW
+                    {
+                        int RWSize = nvsSysInfo.RWSectorCount * nvsSysInfo.RWSectorSize * 1024;
+                        if (ItemData.Length != RWSize)
+                        {
+                            return new BusinessResult(false, $"RWSize is different(RWSector size is {RWSize}, Data Length is {ItemData.Length})");
+                        }
+                    }
+                }
+                if (((param.ItemID >> 13) & 0x03) == 0x1) //RO
+                {
+                    int ROSize = nvsSysInfo.ROSectorCount * nvsSysInfo.ROSectorSize * 1024;
+                    if (ItemData.Length != ROSize)
+                    {
+                        return new BusinessResult(false, $"ROSize is different(RWSector size is {ROSize}, Data Length is {ItemData.Length})");
+                    }
+                }
+            }
 
             BResult = WriteNVItemData(ItemData, progressCallBack);
 
             return BResult;
         }
+
 
         /// <summary>
         /// Read NV Item Data
@@ -704,6 +727,8 @@ namespace CmindProtocol
             };
             ConnectNVSForRead(param, retCallBack);
 
+
+
             if (connectResult.Result == false)
             {
                 return new ReadNVDataResult()
@@ -712,6 +737,7 @@ namespace CmindProtocol
                     Msg = connectResult.Msg
                 };
             }
+      
 
             ReadNVDataResult BResult = null;
             BResult = ReadNVItemData(ItemDataLength, progressCallBack);

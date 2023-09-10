@@ -48,6 +48,11 @@ namespace NVTool.UI
             this.bar2 = new DevExpress.XtraBars.Bar();
             this.barItemFile = new DevExpress.XtraBars.BarSubItem();
             this.barItemSaveAs = new DevExpress.XtraBars.BarButtonItem();
+            this.barButtonItem2 = new DevExpress.XtraBars.BarButtonItem();
+            this.barButtonItem4 = new DevExpress.XtraBars.BarButtonItem();
+            this.barButtonItem5 = new DevExpress.XtraBars.BarButtonItem();
+            this.barButtonItem6 = new DevExpress.XtraBars.BarButtonItem();
+            this.barButtonItem7 = new DevExpress.XtraBars.BarButtonItem();
             this.barSubItem1 = new DevExpress.XtraBars.BarSubItem();
             this.barItemExcelParser = new DevExpress.XtraBars.BarButtonItem();
             this.barButtonItem3 = new DevExpress.XtraBars.BarButtonItem();
@@ -67,11 +72,8 @@ namespace NVTool.UI
             this.barLargeButtonItem1 = new DevExpress.XtraBars.BarLargeButtonItem();
             this.barToolbarsListItem1 = new DevExpress.XtraBars.BarToolbarsListItem();
             this.barButtonItem1 = new DevExpress.XtraBars.BarButtonItem();
-            this.barButtonItem2 = new DevExpress.XtraBars.BarButtonItem();
-            this.barButtonItem4 = new DevExpress.XtraBars.BarButtonItem();
-            this.barButtonItem5 = new DevExpress.XtraBars.BarButtonItem();
-            this.barButtonItem6 = new DevExpress.XtraBars.BarButtonItem();
-            this.barButtonItem7 = new DevExpress.XtraBars.BarButtonItem();
+            this.barButtonItem8 = new DevExpress.XtraBars.BarButtonItem();
+            this.barItemClear = new DevExpress.XtraBars.BarLargeButtonItem();
             ((System.ComponentModel.ISupportInitialize)(this.barManagerMenu)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.popupMenu1)).BeginInit();
             this.SuspendLayout();
@@ -119,9 +121,11 @@ namespace NVTool.UI
             this.barButtonItem4,
             this.barButtonItem5,
             this.barButtonItem6,
-            this.barButtonItem7});
+            this.barButtonItem7,
+            this.barButtonItem8,
+            this.barItemClear});
             this.barManagerMenu.MainMenu = this.bar2;
-            this.barManagerMenu.MaxItemId = 55;
+            this.barManagerMenu.MaxItemId = 57;
             this.barManagerMenu.StatusBar = this.statusBar;
             // 
             // barMenu
@@ -142,7 +146,7 @@ namespace NVTool.UI
             new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.barLoadFromBin, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph),
             new DevExpress.XtraBars.LinkPersistInfo(this.barInPhone),
             new DevExpress.XtraBars.LinkPersistInfo(this.barOutPhone),
-            new DevExpress.XtraBars.LinkPersistInfo(this.barBtnTest, true)});
+            new DevExpress.XtraBars.LinkPersistInfo(this.barBtnTest)});
             this.barMenu.OptionsBar.DrawDragBorder = false;
             this.barMenu.OptionsBar.UseWholeRow = true;
             this.barMenu.Text = "Tools";
@@ -211,7 +215,7 @@ namespace NVTool.UI
             // 
             // barSaveForBin
             // 
-            this.barSaveForBin.Caption = "Save For bin";
+            this.barSaveForBin.Caption = "SaveBin";
             this.barSaveForBin.Id = 38;
             this.barSaveForBin.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("barSaveForBin.ImageOptions.SvgImage")));
             this.barSaveForBin.Name = "barSaveForBin";
@@ -219,9 +223,10 @@ namespace NVTool.UI
             // 
             // barLoadFromBin
             // 
-            this.barLoadFromBin.Caption = "Load From Bin";
+            this.barLoadFromBin.Caption = "LoadBin";
             this.barLoadFromBin.Id = 39;
-            this.barLoadFromBin.ImageOptions.Image = global::NVTool.Properties.Resources.LoadBin;
+            this.barLoadFromBin.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("barLoadFromBin.ImageOptions.Image")));
+            this.barLoadFromBin.ImageOptions.LargeImage = ((System.Drawing.Image)(resources.GetObject("barLoadFromBin.ImageOptions.LargeImage")));
             this.barLoadFromBin.Name = "barLoadFromBin";
             this.barLoadFromBin.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.barLoadFromBin_ItemClick);
             // 
@@ -229,7 +234,8 @@ namespace NVTool.UI
             // 
             this.barInPhone.Caption = "InPhone";
             this.barInPhone.Id = 34;
-            this.barInPhone.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("barInPhone.ImageOptions.SvgImage")));
+            this.barInPhone.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("barInPhone.ImageOptions.Image")));
+            this.barInPhone.ImageOptions.LargeImage = ((System.Drawing.Image)(resources.GetObject("barInPhone.ImageOptions.LargeImage")));
             this.barInPhone.Name = "barInPhone";
             this.barInPhone.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.barInPhone_ItemClick);
             // 
@@ -285,6 +291,36 @@ namespace NVTool.UI
             this.barItemSaveAs.ImageOptions.LargeImage = ((System.Drawing.Image)(resources.GetObject("barItemSaveAs.ImageOptions.LargeImage")));
             this.barItemSaveAs.Name = "barItemSaveAs";
             this.barItemSaveAs.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.barItemSaveAs_ItemClick);
+            // 
+            // barButtonItem2
+            // 
+            this.barButtonItem2.Caption = "Save to Phone";
+            this.barButtonItem2.Id = 50;
+            this.barButtonItem2.Name = "barButtonItem2";
+            // 
+            // barButtonItem4
+            // 
+            this.barButtonItem4.Caption = "Load From Phone";
+            this.barButtonItem4.Id = 51;
+            this.barButtonItem4.Name = "barButtonItem4";
+            // 
+            // barButtonItem5
+            // 
+            this.barButtonItem5.Caption = "Save For Bin";
+            this.barButtonItem5.Id = 52;
+            this.barButtonItem5.Name = "barButtonItem5";
+            // 
+            // barButtonItem6
+            // 
+            this.barButtonItem6.Caption = "Load From Bin";
+            this.barButtonItem6.Id = 53;
+            this.barButtonItem6.Name = "barButtonItem6";
+            // 
+            // barButtonItem7
+            // 
+            this.barButtonItem7.Caption = "Quit";
+            this.barButtonItem7.Id = 54;
+            this.barButtonItem7.Name = "barButtonItem7";
             // 
             // barSubItem1
             // 
@@ -433,35 +469,22 @@ namespace NVTool.UI
             this.barButtonItem1.Id = 44;
             this.barButtonItem1.Name = "barButtonItem1";
             // 
-            // barButtonItem2
+            // barButtonItem8
             // 
-            this.barButtonItem2.Caption = "Save to Phone";
-            this.barButtonItem2.Id = 50;
-            this.barButtonItem2.Name = "barButtonItem2";
+            this.barButtonItem8.Caption = "Clear";
+            this.barButtonItem8.Id = 55;
+            this.barButtonItem8.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("barButtonItem8.ImageOptions.Image")));
+            this.barButtonItem8.ImageOptions.LargeImage = ((System.Drawing.Image)(resources.GetObject("barButtonItem8.ImageOptions.LargeImage")));
+            this.barButtonItem8.Name = "barButtonItem8";
             // 
-            // barButtonItem4
+            // barItemClear
             // 
-            this.barButtonItem4.Caption = "Load From Phone";
-            this.barButtonItem4.Id = 51;
-            this.barButtonItem4.Name = "barButtonItem4";
-            // 
-            // barButtonItem5
-            // 
-            this.barButtonItem5.Caption = "Save For Bin";
-            this.barButtonItem5.Id = 52;
-            this.barButtonItem5.Name = "barButtonItem5";
-            // 
-            // barButtonItem6
-            // 
-            this.barButtonItem6.Caption = "Load From Bin";
-            this.barButtonItem6.Id = 53;
-            this.barButtonItem6.Name = "barButtonItem6";
-            // 
-            // barButtonItem7
-            // 
-            this.barButtonItem7.Caption = "Quit";
-            this.barButtonItem7.Id = 54;
-            this.barButtonItem7.Name = "barButtonItem7";
+            this.barItemClear.Caption = "Clear";
+            this.barItemClear.Id = 56;
+            this.barItemClear.ImageOptions.Image = ((System.Drawing.Image)(resources.GetObject("barLargeButtonItem2.ImageOptions.Image")));
+            this.barItemClear.ImageOptions.LargeImage = ((System.Drawing.Image)(resources.GetObject("barLargeButtonItem2.ImageOptions.LargeImage")));
+            this.barItemClear.Name = "barItemClear";
+            this.barItemClear.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.barItemClear_ItemClick);
             // 
             // MainForm
             // 
@@ -529,6 +552,8 @@ namespace NVTool.UI
         private DevExpress.XtraBars.BarButtonItem barButtonItem5;
         private DevExpress.XtraBars.BarButtonItem barButtonItem6;
         private DevExpress.XtraBars.BarButtonItem barButtonItem7;
+        private DevExpress.XtraBars.BarLargeButtonItem barItemClear;
+        private DevExpress.XtraBars.BarButtonItem barButtonItem8;
     }
 }
 

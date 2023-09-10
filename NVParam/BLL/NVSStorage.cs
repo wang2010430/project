@@ -43,15 +43,15 @@ namespace NVParam.BLL
                 List<byte> listROData = new List<byte>();
                 byte[] roData = ConvertToByteArray(roParam);
 
-                listROData.AddRange(NVSCommon.Separator);
+                listROData.AddRange(NVCommon.Separator);
                 listROData.AddRange(roData);
-                listROData.AddRange(NVSCommon.Separator);
+                listROData.AddRange(NVCommon.Separator);
 
                 List<byte> listRWData = new List<byte>();
                 byte[] rwData = ConvertToByteArray(rwParam);
-                listRWData.AddRange(NVSCommon.Separator);
+                listRWData.AddRange(NVCommon.Separator);
                 listRWData.AddRange(rwData);
-                listRWData.AddRange(NVSCommon.Separator);
+                listRWData.AddRange(NVCommon.Separator);
 
                 listROData.AddRange(listRWData);
 
@@ -86,7 +86,7 @@ namespace NVParam.BLL
                 SymmetricEncryption symmetricEncryption = new SymmetricEncryption(key, iv);
                 byte[] DDecryptData = symmetricEncryption.Decrypt(data);
                 //Find Separator
-                List<byte[]> validData = DataProcessor.FindValidDataWithSeparator(DDecryptData, NVSCommon.Separator);
+                List<byte[]> validData = DataProcessor.FindValidDataWithSeparator(DDecryptData, NVCommon.Separator);
                 for (int count = 0; count < validData.Count; count++)
                 {
                     StorageParam param = ConvertToStorageParam(validData[count]);

@@ -205,6 +205,11 @@ namespace NVTool.UI
             OnButtonClicked(ButtonType.ExcelParser);
         }
 
+        private void barItemClear_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
+        {
+
+        }
+
         public event EventHandler<ButtonClickedEventArgs> ButtonClicked;
         protected virtual void OnButtonClicked(ButtonType btnType)
         {
@@ -250,8 +255,7 @@ namespace NVTool.UI
                     break;
             }
         }
-        #endregion
 
-   
+        #endregion
     }
 }

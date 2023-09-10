@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogNet", "LogNet\LogNet.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MergeBin", "MergeBin\MergeBin.csproj", "{79A09BA9-96B8-4877-86BD-1D58460DAAE5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NVGen", "NVGen\NVGen.csproj", "{A3366B7E-8569-4BB3-8FAD-208F724B7528}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{79A09BA9-96B8-4877-86BD-1D58460DAAE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{79A09BA9-96B8-4877-86BD-1D58460DAAE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{79A09BA9-96B8-4877-86BD-1D58460DAAE5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3366B7E-8569-4BB3-8FAD-208F724B7528}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3366B7E-8569-4BB3-8FAD-208F724B7528}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3366B7E-8569-4BB3-8FAD-208F724B7528}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3366B7E-8569-4BB3-8FAD-208F724B7528}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

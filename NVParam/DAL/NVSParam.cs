@@ -23,6 +23,4 @@ namespace NVParam.DAL
         public int SectorCount = 0;
         public byte[] SectorData;
     }
-
-
 }

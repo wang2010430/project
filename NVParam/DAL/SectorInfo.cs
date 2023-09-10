@@ -24,5 +24,11 @@ namespace NVParam.DAL
         public byte[] Datas { get; set; }
         public ushort ATEIndex { get; set; }
         public ushort DataIndex { get; set; }
+
+        // 计算剩余空间
+        public ushort GetRemainingSpace()
+        {
+            return (ushort)(DataIndex > ATEIndex ? 0 : (ATEIndex - DataIndex));
+        }
     }
 }
